@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Cascade — Decklist Diff</title>
+<title>Cascade — Commander Decklist Toolkit</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -179,6 +179,16 @@
     padding: 18px;
   }
   .color-chart-delta { grid-column: 1 / -1; }
+  .cc-section-label {
+    grid-column: 1 / -1;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted-dim);
+    text-align: center;
+    margin-bottom: 2px;
+  }
   .cc-title {
     font-family: 'Cinzel', serif;
     font-size: 13px;
@@ -319,6 +329,23 @@
     margin-bottom: 14px;
   }
   .lookup-search-row { position: relative; max-width: 460px; }
+  .lookup-search-inputs { display: flex; gap: 8px; }
+  .lookup-search-inputs input[type="text"] { flex: 1; width: auto; min-width: 0; }
+  .random-btn {
+    flex-shrink: 0;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0 14px;
+    border-radius: 6px;
+    background: var(--bg-alt);
+    border: 1px solid var(--border-soft);
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  }
+  .random-btn:hover { border-color: var(--gold); color: var(--gold-bright); }
+  .random-btn:active { transform: scale(0.92); }
+  .random-btn:disabled { opacity: 0.5; cursor: default; }
   .lookup-search-row input[type="text"] {
     width: 100%;
     background: var(--bg-alt);
@@ -602,6 +629,13 @@
   .history-empty { text-align: center; color: var(--muted-dim); font-style: italic; padding: 30px 0; }
 
   /* ---------- PDF preview grid ---------- */
+  .preview-sub {
+    font-size: 12.5px;
+    color: var(--muted);
+    font-style: italic;
+    margin: -8px 0 16px;
+    line-height: 1.5;
+  }
   .preview-toolbar {
     display: flex;
     justify-content: space-between;
@@ -745,6 +779,133 @@
 
   /* ---------- Alternate-arts picker modal ---------- */
   .art-picker-box { max-width: 900px; }
+
+  /* ---------- Card detail modal ---------- */
+  .card-detail-box { max-width: 760px; max-height: 86vh; overflow-y: auto; }
+  .cd-layout { display: flex; gap: 22px; flex-wrap: wrap; margin-bottom: 16px; }
+  .cd-face { display: flex; gap: 16px; flex: 1 1 100%; flex-wrap: wrap; }
+  .cd-image {
+    width: 200px;
+    max-width: 100%;
+    border-radius: 10px;
+    border: 1px solid var(--border-soft);
+    flex-shrink: 0;
+    align-self: flex-start;
+  }
+  .cd-info { flex: 1 1 260px; min-width: 0; }
+  .cd-name-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .cd-face-name { font-family: 'Cinzel', serif; font-size: 16px; color: var(--parchment); }
+  .cd-mana { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--gold-bright); white-space: nowrap; }
+  .cd-type { font-size: 12.5px; color: var(--muted); margin-top: 4px; font-style: italic; }
+  .cd-oracle {
+    margin-top: 10px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--parchment);
+    white-space: pre-wrap;
+  }
+  .cd-pt {
+    margin-top: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    color: var(--gold-bright);
+  }
+  .cd-flavor {
+    margin-top: 10px;
+    font-size: 12.5px;
+    font-style: italic;
+    color: var(--muted-dim);
+  }
+  .cd-meta-row {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: var(--muted);
+    border-top: 1px solid var(--border-soft);
+    border-bottom: 1px solid var(--border-soft);
+    padding: 10px 0;
+    margin-bottom: 16px;
+  }
+  .cd-price { color: var(--gold-bright); }
+  .cd-rulings-title {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--gold-bright);
+    margin-bottom: 10px;
+  }
+  .cd-ruling-item {
+    display: flex;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-soft);
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+  .cd-ruling-item:last-child { border-bottom: none; }
+  .cd-ruling-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted-dim);
+    flex-shrink: 0;
+    width: 78px;
+  }
+  .cd-printings { margin-top: 18px; }
+  .cd-printings-title {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--gold-bright);
+    margin-bottom: 10px;
+  }
+  .cd-printings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+    gap: 12px;
+  }
+  .cd-printing-item {
+    background: var(--bg-alt);
+    border: 2px solid var(--border-soft);
+    border-radius: 8px;
+    padding: 6px;
+    cursor: pointer;
+    transition: border-color 0.12s ease, transform 0.12s ease;
+  }
+  .cd-printing-item:hover { border-color: var(--gold); transform: translateY(-2px); }
+  .cd-printing-item.selected { border-color: var(--gold-bright); box-shadow: 0 0 0 1px var(--gold-bright); }
+  .cd-printing-item img {
+    width: 100%;
+    aspect-ratio: 5 / 7;
+    object-fit: cover;
+    border-radius: 5px;
+    display: block;
+    background: var(--bg);
+  }
+  .cd-printing-set {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 6px;
+    line-height: 1.3;
+    white-space: normal;
+    word-break: break-word;
+  }
+  .cd-printing-price {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--gold-bright);
+    text-align: center;
+    margin-top: 4px;
+  }
+  .cd-printing-price.na { color: var(--muted-dim); }
+  .cd-printing-item.selected .cd-printing-set { color: var(--gold-bright); }
   .art-picker-status {
     font-family: 'JetBrains Mono', monospace;
     font-size: 11.5px;
@@ -1034,12 +1195,12 @@
 
   <header>
     <button class="history-btn" id="historyBtn">History</button>
-    <div class="eyebrow">Decklist Diff Tool</div>
+    <div class="eyebrow">Commander Decklist Toolkit</div>
     <h1>Cascade</h1>
     <div class="pips">
       <div class="pip w"></div><div class="pip u"></div><div class="pip b"></div><div class="pip r"></div><div class="pip g"></div>
     </div>
-    <p class="subtitle">Paste two versions of a decklist. Cascade resolves the stack, tells you what was cut and what was added, and hovering any card reveals its face — courtesy of Scryfall.</p>
+    <p class="subtitle">Paste two versions of a decklist to see exactly what changed — price totals, color identity shifts, and all — then turn the new additions into a print-ready proxy sheet with alternate arts, tokens, and emblems included automatically. Click any card for its full text and rulings, courtesy of Scryfall.</p>
   </header>
 
   <div class="trending-commanders">
@@ -1053,9 +1214,12 @@
 
   <div class="lookup-panel">
     <div class="lookup-title">Commander Lookup</div>
-    <div class="lookup-sub">Find a legendary creature to pull in its precon list or an EDHREC-style average decklist.</div>
+    <div class="lookup-sub">Search for a commander (or roll the dice for a random one), then pull in its precon list or an EDHREC-style average decklist.</div>
     <div class="lookup-search-row">
-      <input type="text" id="commanderSearch" placeholder="Search a legendary creature…" autocomplete="off" />
+      <div class="lookup-search-inputs">
+        <input type="text" id="commanderSearch" placeholder="Search a legendary creature…" autocomplete="off" />
+        <button type="button" id="randomCommanderBtn" class="random-btn" title="Random legendary creature">🎲</button>
+      </div>
       <div class="autocomplete-list" id="commanderResults"></div>
     </div>
 
@@ -1123,6 +1287,7 @@
   </div>
 
   <div class="color-charts" id="colorCharts">
+    <div class="cc-section-label">Color Identity Breakdown — how the deck's colors shift between versions</div>
     <div class="color-chart-col">
       <div class="cc-title">Original — Color Identity</div>
       <div class="cc-body">
@@ -1167,7 +1332,6 @@
           <span>Added</span>
           <div class="added-actions">
             <button id="copyAddedBtn" class="icon-btn">Copy</button>
-            <button id="downloadImagesBtn" class="icon-btn">Open Image Sheet</button>
             <button id="buildPdfBtn" class="icon-btn">Preview &amp; Print PDF</button>
             <span class="tag" id="addedTag">0 cards</span>
           </div>
@@ -1210,6 +1374,7 @@
       <h2>Print Preview</h2>
       <button class="modal-close" id="previewCloseBtn">Close</button>
     </div>
+    <div class="preview-sub">Tokens and emblems needed by these cards are added automatically. Drag any card to reorder, click one to browse its alternate arts, or search below to add more cards, tokens, or emblems by hand.</div>
     <div class="preview-toolbar">
       <span class="preview-count" id="previewCount">0 cards</span>
       <div class="preview-add-row">
@@ -1238,6 +1403,16 @@
     </div>
     <div class="art-picker-status" id="artPickerStatus"></div>
     <div class="art-picker-grid" id="artPickerGrid"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="cardDetailModal">
+  <div class="modal-box card-detail-box">
+    <div class="modal-head">
+      <h2 id="cardDetailTitle">Card Details</h2>
+      <button class="modal-close" id="cardDetailCloseBtn">Close</button>
+    </div>
+    <div id="cardDetailBody"></div>
   </div>
 </div>
 
@@ -1272,7 +1447,6 @@
   const unrecognizedList = document.getElementById('unrecognizedList');
   const preview = document.getElementById('cardPreview');
   const copyAddedBtn=document.getElementById('copyAddedBtn');
-  const downloadImagesBtn = document.getElementById('downloadImagesBtn');
   const buildPdfBtn = document.getElementById('buildPdfBtn');
   const includeBacksToggle = document.getElementById('includeBacksToggle');
   const excludeBasicsToggle = document.getElementById('excludeBasicsToggle');
@@ -1310,14 +1484,25 @@
   const artPickerStatus = document.getElementById('artPickerStatus');
   const artPickerGrid = document.getElementById('artPickerGrid');
 
+  // ---- Card detail modal DOM refs ----
+  const cardDetailModal = document.getElementById('cardDetailModal');
+  const cardDetailBox = cardDetailModal.querySelector('.card-detail-box');
+  const cardDetailCloseBtn = document.getElementById('cardDetailCloseBtn');
+  const cardDetailTitle = document.getElementById('cardDetailTitle');
+  const cardDetailBody = document.getElementById('cardDetailBody');
+
   // ---- Commander Lookup DOM refs ----
   const commanderSearch = document.getElementById('commanderSearch');
+  const randomCommanderBtn = document.getElementById('randomCommanderBtn');
   const trendingRow = document.getElementById('trendingRow');
   const commanderResults = document.getElementById('commanderResults');
   const lookupSelected = document.getElementById('lookupSelected');
   const selName = document.getElementById('selName');
   const selType = document.getElementById('selType');
   const selImage = document.getElementById('selImage');
+  selImage.style.cursor = 'pointer';
+  selImage.title = 'Click for full card details';
+  selImage.addEventListener('click', () => { if (selectedCommander) openCardDetail(selectedCommander); });
   const preconSelect = document.getElementById('preconSelect');
   const loadPreconBtn = document.getElementById('loadPreconBtn');
   const preconStatus = document.getElementById('preconStatus');
@@ -1467,6 +1652,261 @@
     if (p.eur) return `€${parseFloat(p.eur).toFixed(2)}`;
     return null;
   }
+
+  // =====================================================================
+  //  Card detail modal — click any card name (or the commander art preview)
+  //  to see the full card: image, type line, oracle text, power/toughness
+  //  or loyalty, flavor text, set/price, and Scryfall's official rulings.
+  // =====================================================================
+
+  function formatManaCost(mc) {
+    if (!mc) return '';
+    return mc.replace(/\{/g, '').replace(/\}/g, ' ').trim();
+  }
+
+  // Returns one entry per face for split/transform/adventure/modal-dfc
+  // cards, or a single entry for everything else.
+  function detailFaces(card) {
+    if (Array.isArray(card.card_faces) && card.card_faces.some(f => f.oracle_text)) {
+      return card.card_faces.map(f => ({
+        name: f.name,
+        mana_cost: f.mana_cost,
+        type_line: f.type_line || card.type_line,
+        oracle_text: f.oracle_text || '',
+        power: f.power,
+        toughness: f.toughness,
+        loyalty: f.loyalty,
+        flavor_text: f.flavor_text,
+        image: (f.image_uris && (f.image_uris.normal || f.image_uris.large)) || cardImageUrl(card),
+      }));
+    }
+    return [{
+      name: card.name,
+      mana_cost: card.mana_cost,
+      type_line: card.type_line,
+      oracle_text: card.oracle_text || '',
+      power: card.power,
+      toughness: card.toughness,
+      loyalty: card.loyalty,
+      flavor_text: card.flavor_text,
+      image: cardImageUrl(card),
+    }];
+  }
+
+  function renderCardDetail(card) {
+    cardDetailTitle.textContent = card.name;
+    cardDetailBody.innerHTML = '';
+
+    const layout = document.createElement('div');
+    layout.className = 'cd-layout';
+
+    detailFaces(card).forEach(face => {
+      const faceBlock = document.createElement('div');
+      faceBlock.className = 'cd-face';
+
+      if (face.image) {
+        const img = document.createElement('img');
+        img.className = 'cd-image';
+        img.src = face.image;
+        img.alt = face.name;
+        faceBlock.appendChild(img);
+      }
+
+      const info = document.createElement('div');
+      info.className = 'cd-info';
+
+      const nameRow = document.createElement('div');
+      nameRow.className = 'cd-name-row';
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'cd-face-name';
+      nameSpan.textContent = face.name;
+      nameRow.appendChild(nameSpan);
+      const mc = formatManaCost(face.mana_cost);
+      if (mc) {
+        const manaSpan = document.createElement('span');
+        manaSpan.className = 'cd-mana';
+        manaSpan.textContent = mc;
+        nameRow.appendChild(manaSpan);
+      }
+      info.appendChild(nameRow);
+
+      if (face.type_line) {
+        const typeEl = document.createElement('div');
+        typeEl.className = 'cd-type';
+        typeEl.textContent = face.type_line;
+        info.appendChild(typeEl);
+      }
+
+      if (face.oracle_text) {
+        const oracle = document.createElement('div');
+        oracle.className = 'cd-oracle';
+        oracle.textContent = face.oracle_text;
+        info.appendChild(oracle);
+      }
+
+      if (face.power != null && face.toughness != null) {
+        const pt = document.createElement('div');
+        pt.className = 'cd-pt';
+        pt.textContent = `${face.power} / ${face.toughness}`;
+        info.appendChild(pt);
+      } else if (face.loyalty != null) {
+        const loy = document.createElement('div');
+        loy.className = 'cd-pt';
+        loy.textContent = `Loyalty: ${face.loyalty}`;
+        info.appendChild(loy);
+      }
+
+      if (face.flavor_text) {
+        const flavor = document.createElement('div');
+        flavor.className = 'cd-flavor';
+        flavor.textContent = face.flavor_text;
+        info.appendChild(flavor);
+      }
+
+      faceBlock.appendChild(info);
+      layout.appendChild(faceBlock);
+    });
+
+    cardDetailBody.appendChild(layout);
+
+    const metaRow = document.createElement('div');
+    metaRow.className = 'cd-meta-row';
+    const setBits = [];
+    if (card.set_name) setBits.push(`${card.set_name} (${(card.set || '').toUpperCase()})`);
+    if (card.rarity) setBits.push(card.rarity.charAt(0).toUpperCase() + card.rarity.slice(1));
+    if (setBits.length) {
+      const setSpan = document.createElement('span');
+      setSpan.textContent = setBits.join(' · ');
+      metaRow.appendChild(setSpan);
+    }
+    const price = cardPrice(card);
+    if (price) {
+      const priceSpan = document.createElement('span');
+      priceSpan.className = 'cd-price';
+      priceSpan.textContent = price;
+      metaRow.appendChild(priceSpan);
+    }
+    if (metaRow.children.length) cardDetailBody.appendChild(metaRow);
+
+    const rulings = document.createElement('div');
+    rulings.className = 'cd-rulings';
+    rulings.id = 'cdRulings';
+    rulings.innerHTML = '<div class="cc-legend-empty">Loading rulings…</div>';
+    cardDetailBody.appendChild(rulings);
+
+    const printings = document.createElement('div');
+    printings.className = 'cd-printings';
+    printings.id = 'cdPrintings';
+    printings.innerHTML = '<div class="cd-printings-title">Other Printings</div><div class="cc-legend-empty">Loading other printings…</div>';
+    cardDetailBody.appendChild(printings);
+  }
+
+  async function openCardDetail(card) {
+    if (!card) return;
+    renderCardDetail(card);
+    cardDetailModal.classList.add('show');
+    cardDetailModal.scrollTop = 0;
+    if (cardDetailBox) cardDetailBox.scrollTop = 0;
+    loadCardDetailRulings(card);
+    loadCardDetailPrintings(card);
+  }
+
+  async function loadCardDetailRulings(card) {
+    const rulingsEl = cardDetailBody.querySelector('#cdRulings');
+    if (!rulingsEl) return;
+    if (!card.rulings_uri) {
+      rulingsEl.innerHTML = '<div class="cc-legend-empty">No rulings available.</div>';
+      return;
+    }
+    try {
+      const res = await fetch(card.rulings_uri);
+      if (!res.ok) throw new Error('rulings fetch failed');
+      const data = await res.json();
+      const list = data.data || [];
+      if (!list.length) {
+        rulingsEl.innerHTML = '<div class="cc-legend-empty">No rulings on file for this card.</div>';
+        return;
+      }
+      rulingsEl.innerHTML = '<div class="cd-rulings-title">Rulings</div>';
+      list.forEach(r => {
+        const item = document.createElement('div');
+        item.className = 'cd-ruling-item';
+        const date = document.createElement('span');
+        date.className = 'cd-ruling-date';
+        date.textContent = r.published_at || '';
+        const text = document.createElement('span');
+        text.textContent = r.comment || '';
+        item.appendChild(date);
+        item.appendChild(text);
+        rulingsEl.appendChild(item);
+      });
+    } catch (e) {
+      rulingsEl.innerHTML = '<div class="cc-legend-empty">Couldn\'t load rulings — check your connection.</div>';
+    }
+  }
+
+  // Shows every other printing of this card at the bottom of the modal —
+  // small thumbnail, set name, and price. Clicking one reopens the modal
+  // for that specific printing (image, flavor text, and price can all
+  // differ by printing, even though the rules text stays the same).
+  async function loadCardDetailPrintings(card) {
+    const printingsEl = cardDetailBody.querySelector('#cdPrintings');
+    if (!printingsEl) return;
+    if (!card.prints_search_uri) {
+      printingsEl.innerHTML = '';
+      return;
+    }
+    try {
+      const uri = card.prints_search_uri;
+      const sep = uri.includes('?') ? '&' : '?';
+      const res = await fetch(`${uri}${sep}order=released&unique=prints`);
+      if (!res.ok) throw new Error('prints fetch failed');
+      const data = await res.json();
+      const prints = data.data || [];
+      if (prints.length <= 1) {
+        printingsEl.innerHTML = '';
+        return;
+      }
+      printingsEl.innerHTML = '<div class="cd-printings-title">Other Printings</div>';
+      const grid = document.createElement('div');
+      grid.className = 'cd-printings-grid';
+      prints.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'cd-printing-item' + (p.id === card.id ? ' selected' : '');
+
+        const img = document.createElement('img');
+        img.src = cardImageUrl(p) || '';
+        img.alt = p.name;
+        img.loading = 'lazy';
+        item.appendChild(img);
+
+        const setEl = document.createElement('div');
+        setEl.className = 'cd-printing-set';
+        setEl.textContent = p.set_name ? `${p.set_name} (${(p.set || '').toUpperCase()})` : (p.set || '').toUpperCase();
+        item.appendChild(setEl);
+
+        const price = cardPrice(p);
+        const priceEl = document.createElement('div');
+        priceEl.className = price ? 'cd-printing-price' : 'cd-printing-price na';
+        priceEl.textContent = price || 'No price';
+        item.appendChild(priceEl);
+
+        item.title = `${p.name} — ${setEl.textContent}`;
+        item.addEventListener('click', () => openCardDetail(p));
+
+        grid.appendChild(item);
+      });
+      printingsEl.appendChild(grid);
+    } catch (e) {
+      printingsEl.innerHTML = '<div class="cd-printings-title">Other Printings</div><div class="cc-legend-empty">Couldn\'t load other printings.</div>';
+    }
+  }
+
+  function closeCardDetail() {
+    cardDetailModal.classList.remove('show');
+  }
+  cardDetailCloseBtn.addEventListener('click', closeCardDetail);
+  cardDetailModal.addEventListener('click', (e) => { if (e.target === cardDetailModal) closeCardDetail(); });
 
   // Returns a numeric USD unit price, or null if Scryfall has none on file.
   // (Used for the column totals — only USD fields are summed so the total
@@ -1686,6 +2126,9 @@
 
       const img = cardImageUrl(card);
       attachHoverPreview(nameEl, img);
+      nameEl.style.cursor = 'pointer';
+      nameEl.title = 'Click for full card details';
+      nameEl.addEventListener('click', () => openCardDetail(card));
     } else {
       attachHoverPreview(nameEl, null);
     }
@@ -1994,84 +2437,6 @@
       saveHistory([]);
       renderHistoryList();
     }
-  });
-
-  // =====================================================================
-  //  Open an image sheet for the Added cards — browser version of
-  //  ProxiesScript.py.
-  //
-  //  This used to fetch() each image and bundle it into a .zip, but
-  //  cards.scryfall.io never sends an Access-Control-Allow-Origin header on
-  //  image responses, so a script can never read those bytes — fetch()
-  //  fails outright with a CORS error, every time, for every image. Plain
-  //  <img> display (no byte reading) is completely unaffected by that, so
-  //  instead this opens a new tab with every image laid out normally —
-  //  click one to open it full-size, then right-click → "Save Image As…".
-  // =====================================================================
-
-  downloadImagesBtn.addEventListener('click', () => {
-    if (!latestAdds.length) { setJobStatus('Nothing to show yet — compare two lists first.', true); return; }
-    const includeBacks = includeBacksToggle.checked;
-
-    const withCards = latestAdds.filter(a => a.card);
-    const missing = latestAdds.filter(a => !a.card).map(a => a.name);
-    if (!withCards.length) {
-      setJobStatus('None of the added cards resolved on Scryfall — nothing to show.', true);
-      return;
-    }
-
-    const entries = [];
-    withCards.forEach(item => {
-      const faces = getCardFaceImages(item.card, 'large');
-      const usableFaces = includeBacks ? faces : faces.slice(0, 1);
-      if (!usableFaces.length) { missing.push(item.name); return; }
-      usableFaces.forEach(f => entries.push({
-        name: ((f.label || item.name) + (f.suffix || '')),
-        qty: item.qty,
-        url: f.url,
-        setName: item.card.set_name || '',
-        setCode: (item.card.set || '').toUpperCase()
-      }));
-    });
-
-    const win = window.open('', '_blank');
-    if (!win) {
-      setJobStatus('Your browser blocked the new tab — allow pop-ups for this page and try again.', true);
-      return;
-    }
-
-    const manifestText = withCards.map(i => `${i.qty} ${i.name}`).join('\n')
-      + (missing.length ? `\n\nNot found on Scryfall:\n${missing.join('\n')}` : '');
-
-    const cardsHtml = entries.map(e => `
-      <a class="card" href="${escapeHtml(e.url)}" target="_blank" rel="noopener">
-        <img src="${escapeHtml(e.url)}" alt="${escapeHtml(e.name)}" loading="lazy">
-        <div class="cap">${escapeHtml(e.name)} <span class="qty">×${e.qty}</span><br><span class="set">${escapeHtml(e.setName)}${e.setCode ? ' (' + escapeHtml(e.setCode) + ')' : ''}</span></div>
-      </a>`).join('');
-
-    win.document.write(`<!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>Cascade — Added Card Images</title>
-<style>
-  body { font-family: -apple-system, Segoe UI, sans-serif; background:#14201a; color:#e9dfc6; margin:0; padding:24px; }
-  h1 { font-size:18px; margin:0 0 6px; }
-  p.hint { color:#9fb3a6; font-size:13px; margin:0 0 18px; max-width:640px; line-height:1.5; }
-  textarea { width:100%; max-width:640px; height:90px; background:#0e1712; color:#e9dfc6; border:1px solid #2c3b32; border-radius:6px; padding:8px; font-family:monospace; font-size:12px; margin-bottom:22px; box-sizing:border-box; }
-  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:16px; max-width:1200px; }
-  .card { color:inherit; text-decoration:none; background:#1b2a21; border:1px solid #2c3b32; border-radius:8px; padding:8px; display:block; }
-  .card img { width:100%; aspect-ratio:5/7; object-fit:cover; border-radius:5px; display:block; background:#0e1712; }
-  .cap { font-size:11px; margin-top:6px; line-height:1.35; }
-  .qty { color:#c9a24b; }
-  .set { color:#9fb3a6; }
-</style></head>
-<body>
-  <h1>Added Cards — ${entries.length} image${entries.length === 1 ? '' : 's'}</h1>
-  <p class="hint">Click an image to open it full-size, then right-click → "Save Image As…". (Scryfall's image server only allows displaying these, not reading their bytes with a script, so a one-click zip isn't possible — this page is the reliable alternative.)</p>
-  <textarea readonly>${escapeHtml(manifestText)}</textarea>
-  <div class="grid">${cardsHtml}</div>
-</body></html>`);
-    win.document.close();
-
-    setJobStatus(missing.length ? `Opened image sheet — ${missing.length} card(s) had no Scryfall match.` : 'Opened image sheet in a new tab.');
   });
 
   // =====================================================================
@@ -2727,6 +3092,25 @@
   });
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.lookup-search-row')) commanderResults.classList.remove('show');
+  });
+
+  randomCommanderBtn.addEventListener('click', async () => {
+    randomCommanderBtn.disabled = true;
+    const original = randomCommanderBtn.textContent;
+    randomCommanderBtn.textContent = '…';
+    try {
+      const q = encodeURIComponent('is:commander type:creature');
+      const res = await fetch(`https://api.scryfall.com/cards/random?q=${q}`);
+      if (res.ok) {
+        const card = await res.json();
+        selectCommander(card);
+      }
+    } catch (e) {
+      // ignore — button just resets below
+    } finally {
+      randomCommanderBtn.disabled = false;
+      randomCommanderBtn.textContent = original;
+    }
   });
 
   function selectCommander(card) {
