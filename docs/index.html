@@ -551,6 +551,22 @@
     color: var(--muted);
   }
   .history-btn:hover { color: var(--gold-bright); border-color: var(--gold); }
+  .howto-btn {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--muted);
+  }
+  .howto-btn:hover { color: var(--gold-bright); border-color: var(--gold); }
 
   /* ---------- Modal system (History + PDF Preview) ---------- */
   .modal-overlay {
@@ -906,6 +922,51 @@
   }
   .cd-printing-price.na { color: var(--muted-dim); }
   .cd-printing-item.selected .cd-printing-set { color: var(--gold-bright); }
+
+  /* ---------- What Do I Do? modal ---------- */
+  .howto-box { max-width: 760px; max-height: 86vh; overflow-y: auto; }
+  .howto-intro {
+    font-size: 13.5px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 22px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .howto-section { margin-bottom: 28px; }
+  .howto-section:last-child { margin-bottom: 4px; }
+  .howto-section h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    color: var(--gold-bright);
+    margin: 0 0 6px;
+  }
+  .howto-section > p.howto-lede {
+    font-size: 12.5px;
+    color: var(--muted);
+    font-style: italic;
+    margin: 0 0 12px;
+  }
+  .howto-diagram {
+    width: 100%;
+    height: auto;
+    display: block;
+    margin-bottom: 14px;
+    background: var(--bg-alt);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    padding: 8px 0;
+  }
+  .howto-section ol, .howto-section ul {
+    margin: 0;
+    padding-left: 20px;
+    color: var(--parchment);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .howto-section li { margin-bottom: 4px; }
+  .howto-section b { color: var(--gold-bright); }
   .art-picker-status {
     font-family: 'JetBrains Mono', monospace;
     font-size: 11.5px;
@@ -1194,6 +1255,7 @@
 <div class="wrap">
 
   <header>
+    <button class="howto-btn" id="howToBtn">What do I do?</button>
     <button class="history-btn" id="historyBtn">History</button>
     <div class="eyebrow">Commander Decklist Toolkit</div>
     <h1>Cascade</h1>
@@ -1416,6 +1478,147 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="howToModal">
+  <div class="modal-box howto-box">
+    <div class="modal-head">
+      <h2>What Do I Do?</h2>
+      <button class="modal-close" id="howToCloseBtn">Close</button>
+    </div>
+
+    <div class="howto-intro">Cascade compares two decklists, prices and charts the difference, and turns the new cards into a print-ready proxy sheet. Here are the two most common ways people use it, plus how the print preview works.</div>
+
+    <div class="howto-section">
+      <h3>Upgrading a Precon</h3>
+      <p class="howto-lede">Turn a stock preconstructed deck into your own build, and see exactly what changed.</p>
+      <svg viewBox="0 0 680 130" xmlns="http://www.w3.org/2000/svg" class="howto-diagram">
+        <rect x="10" y="15" width="140" height="100" rx="10" fill="#1d2721" stroke="#37483d"/>
+        <text x="80" y="52" text-anchor="middle" font-size="26">👑</text>
+        <text x="80" y="76" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#e6c878">1 · PICK COMMANDER</text>
+        <text x="80" y="93" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#8fa89a">search or roll 🎲</text>
+
+        <text x="165" y="75" text-anchor="middle" font-size="22" fill="#c9a24b">→</text>
+
+        <rect x="180" y="15" width="140" height="100" rx="10" fill="#1d2721" stroke="#37483d"/>
+        <text x="250" y="52" text-anchor="middle" font-size="26">📋</text>
+        <text x="250" y="76" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#e6c878">2 · LOAD PRECON</text>
+        <text x="250" y="93" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#8fa89a">into Original</text>
+
+        <text x="335" y="75" text-anchor="middle" font-size="22" fill="#c9a24b">→</text>
+
+        <rect x="350" y="15" width="140" height="100" rx="10" fill="#1d2721" stroke="#37483d"/>
+        <text x="420" y="52" text-anchor="middle" font-size="26">✏️</text>
+        <text x="420" y="76" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#e6c878">3 · PASTE UPGRADE</text>
+        <text x="420" y="93" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#8fa89a">into Updated</text>
+
+        <text x="505" y="75" text-anchor="middle" font-size="22" fill="#c9a24b">→</text>
+
+        <rect x="520" y="15" width="140" height="100" rx="10" fill="#1d2721" stroke="#37483d"/>
+        <text x="590" y="52" text-anchor="middle" font-size="26">⚖️</text>
+        <text x="590" y="76" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#e6c878">4 · COMPARE</text>
+        <text x="590" y="93" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#8fa89a">see cuts &amp; adds</text>
+      </svg>
+      <ol>
+        <li>Search for the precon's commander in <b>Commander Lookup</b> up top — or pick one from Popular Commanders, or roll 🎲.</li>
+        <li>Under <b>Precon Decklist</b>, click <b>Load into Original</b>. This pulls the actual stock 100-card list straight in.</li>
+        <li>Paste (or type) your upgraded 100 cards into the <b>Updated</b> box.</li>
+        <li>Click <b>Compare lists</b>. The Cut and Added columns show exactly what changed, with price totals and a color identity shift chart underneath.</li>
+      </ol>
+    </div>
+
+    <div class="howto-section">
+      <h3>Building a New Deck Around a Commander</h3>
+      <p class="howto-lede">No list yet? Start from what's actually being played.</p>
+      <svg viewBox="0 0 510 130" xmlns="http://www.w3.org/2000/svg" class="howto-diagram">
+        <rect x="10" y="15" width="140" height="100" rx="10" fill="#1d2721" stroke="#37483d"/>
+        <text x="80" y="52" text-anchor="middle" font-size="26">👑</text>
+        <text x="80" y="76" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#e6c878">1 · PICK COMMANDER</text>
+        <text x="80" y="93" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#8fa89a">search or roll 🎲</text>
+
+        <text x="165" y="75" text-anchor="middle" font-size="22" fill="#c9a24b">→</text>
+
+        <rect x="180" y="15" width="140" height="100" rx="10" fill="#1d2721" stroke="#37483d"/>
+        <text x="250" y="52" text-anchor="middle" font-size="26">🌐</text>
+        <text x="250" y="76" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#e6c878">2 · LOAD EDHREC</text>
+        <text x="250" y="93" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#8fa89a">avg. build → Updated</text>
+
+        <text x="335" y="75" text-anchor="middle" font-size="22" fill="#c9a24b">→</text>
+
+        <rect x="350" y="15" width="140" height="100" rx="10" fill="#1d2721" stroke="#37483d"/>
+        <text x="420" y="52" text-anchor="middle" font-size="26">⚖️</text>
+        <text x="420" y="76" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#e6c878">3 · COMPARE</text>
+        <text x="420" y="93" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#8fa89a">get a full decklist</text>
+      </svg>
+      <ol>
+        <li>Search for or pick your commander the same way as above.</li>
+        <li>Under <b>EDHREC Average Deck</b>, choose a power bracket and budget if you like, then click <b>Load into Updated</b>.</li>
+        <li>Leave <b>Original</b> empty and click <b>Compare lists</b> — every card shows up as "Added," giving you a full, priced decklist to start building from.</li>
+      </ol>
+    </div>
+
+    <div class="howto-section">
+      <h3>The Print Preview (Proxy Sheet)</h3>
+      <p class="howto-lede">Once you have Added cards, click <b>Preview &amp; Print PDF</b> to open a print-ready sheet you can fine-tune before printing.</p>
+      <svg viewBox="0 0 700 270" xmlns="http://www.w3.org/2000/svg" class="howto-diagram">
+        <rect x="20" y="14" width="320" height="30" rx="6" fill="#0f1512" stroke="#2a3830"/>
+        <text x="34" y="35" font-size="14">🔎</text>
+        <text x="54" y="34" font-family="JetBrains Mono, monospace" font-size="10" fill="#63796c">Add a card, token, or emblem…</text>
+
+        <rect x="20" y="70" width="120" height="160" rx="8" fill="#1d2721" stroke="#37483d"/>
+        <rect x="30" y="80" width="100" height="90" rx="4" fill="#141b17"/>
+        <rect x="30" y="178" width="100" height="6" rx="2" fill="#37483d"/>
+        <rect x="30" y="190" width="70" height="6" rx="2" fill="#2a3830"/>
+
+        <text x="163" y="142" text-anchor="middle" font-size="20">✋</text>
+        <text x="163" y="168" text-anchor="middle" font-size="20" fill="#c9a24b">↔</text>
+
+        <rect x="190" y="70" width="120" height="160" rx="8" fill="#1d2721" stroke="#e6c878" stroke-width="2" stroke-dasharray="5,4"/>
+        <rect x="200" y="80" width="100" height="90" rx="4" fill="#141b17"/>
+        <rect x="200" y="178" width="100" height="6" rx="2" fill="#37483d"/>
+        <rect x="200" y="190" width="70" height="6" rx="2" fill="#2a3830"/>
+        <circle cx="292" cy="88" r="14" fill="#141b17" stroke="#e6c878" stroke-width="1.5"/>
+        <text x="292" y="93" text-anchor="middle" font-size="13">🔍</text>
+
+        <rect x="360" y="70" width="120" height="160" rx="8" fill="#1d2721" stroke="#37483d"/>
+        <rect x="370" y="80" width="100" height="90" rx="4" fill="#141b17"/>
+        <rect x="370" y="178" width="100" height="6" rx="2" fill="#37483d"/>
+        <rect x="370" y="190" width="70" height="6" rx="2" fill="#2a3830"/>
+        <rect x="368" y="76" width="48" height="15" rx="4" fill="#141b17" stroke="#5f9dc9"/>
+        <text x="392" y="87" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#5f9dc9">TOKEN</text>
+
+        <rect x="530" y="70" width="120" height="160" rx="8" fill="#141b17" stroke="#37483d" stroke-dasharray="6,5"/>
+        <text x="590" y="165" text-anchor="middle" font-size="36" fill="#63796c">+</text>
+
+        <text x="80" y="250" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#8fa89a">Drag to</text>
+        <text x="80" y="262" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#8fa89a">reorder</text>
+
+        <text x="250" y="250" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#8fa89a">Click for</text>
+        <text x="250" y="262" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#8fa89a">alternate arts</text>
+
+        <text x="420" y="250" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#8fa89a">Tokens &amp; emblems</text>
+        <text x="420" y="262" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#8fa89a">auto-added</text>
+
+        <text x="590" y="250" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#8fa89a">Search to</text>
+        <text x="590" y="262" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#8fa89a">add more</text>
+      </svg>
+      <ul>
+        <li><b>Search</b> — the first box adds any card by name; the second adds tokens, emblems, or similar indicators by name.</li>
+        <li><b>Rearrange</b> — drag any card to a new spot in the sheet.</li>
+        <li><b>Alternate art</b> — click a card to browse every printing on Scryfall and swap in a different set or art.</li>
+        <li>Tokens and emblems a card creates (Treasure, Beast, Clue, Monarch…) are pulled in automatically.</li>
+        <li>When it's ready, click <b>Print / Save as PDF</b> — it opens your browser's print dialog, landscape, 8 cards per page, with cut lines.</li>
+      </ul>
+    </div>
+
+    <div class="howto-section">
+      <h3>A Few More Things</h3>
+      <ul>
+        <li>Click any card's name to see its full text, rulings, and every other printing with prices.</li>
+        <li><b>History</b> (top right) saves every comparison you run, so you can revisit past sessions.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
 <script>
 (function () {
   const listA = document.getElementById('listA');
@@ -1456,6 +1659,9 @@
 
   // ---- History DOM refs ----
   const historyBtn = document.getElementById('historyBtn');
+  const howToBtn = document.getElementById('howToBtn');
+  const howToModal = document.getElementById('howToModal');
+  const howToCloseBtn = document.getElementById('howToCloseBtn');
   const historyModal = document.getElementById('historyModal');
   const historyCloseBtn = document.getElementById('historyCloseBtn');
   const clearHistoryBtn = document.getElementById('clearHistoryBtn');
@@ -1788,6 +1994,11 @@
     }
     if (metaRow.children.length) cardDetailBody.appendChild(metaRow);
 
+    const tokens = document.createElement('div');
+    tokens.className = 'cd-printings';
+    tokens.id = 'cdTokens';
+    cardDetailBody.appendChild(tokens);
+
     const rulings = document.createElement('div');
     rulings.className = 'cd-rulings';
     rulings.id = 'cdRulings';
@@ -1809,6 +2020,64 @@
     if (cardDetailBox) cardDetailBox.scrollTop = 0;
     loadCardDetailRulings(card);
     loadCardDetailPrintings(card);
+    loadCardDetailTokens(card);
+  }
+
+  // Shows any tokens/emblems/markers this specific card creates (Treasure,
+  // Beast, Monarch…), using the same detection as the print preview's
+  // auto-add. Each is clickable to open its own detail view.
+  async function loadCardDetailTokens(card) {
+    const el = cardDetailBody.querySelector('#cdTokens');
+    if (!el) return;
+
+    const parts = getTokenParts(card);
+    if (!parts.length && !cardHasOracleGrant(card)) {
+      el.innerHTML = '';
+      return;
+    }
+
+    el.innerHTML = '<div class="cd-printings-title">Tokens &amp; Emblems Created</div><div class="cc-legend-empty">Loading…</div>';
+
+    const seen = new Set();
+    const results = [];
+    const fromParts = await Promise.all(parts.map(fetchTokenCard));
+    fromParts.forEach(t => { if (t && !seen.has(t.id)) { seen.add(t.id); results.push(t); } });
+    const grants = await fetchOracleTextGrants(card);
+    grants.forEach(t => { if (t && !seen.has(t.id)) { seen.add(t.id); results.push(t); } });
+
+    if (!results.length) {
+      el.innerHTML = '';
+      return;
+    }
+
+    el.innerHTML = '<div class="cd-printings-title">Tokens &amp; Emblems Created</div>';
+    const grid = document.createElement('div');
+    grid.className = 'cd-printings-grid';
+    results.forEach(t => {
+      const item = document.createElement('div');
+      item.className = 'cd-printing-item';
+
+      const img = document.createElement('img');
+      img.src = cardImageUrl(t) || '';
+      img.alt = t.name;
+      img.loading = 'lazy';
+      item.appendChild(img);
+
+      const nameEl = document.createElement('div');
+      nameEl.className = 'cd-printing-set';
+      nameEl.textContent = t.name;
+      item.appendChild(nameEl);
+
+      const kindEl = document.createElement('div');
+      kindEl.className = 'cd-printing-price';
+      kindEl.textContent = isEmblemLike(t) ? 'Emblem' : 'Token';
+      item.appendChild(kindEl);
+
+      item.title = `View ${t.name}`;
+      item.addEventListener('click', () => openCardDetail(t));
+      grid.appendChild(item);
+    });
+    el.appendChild(grid);
   }
 
   async function loadCardDetailRulings(card) {
@@ -2430,6 +2699,9 @@
   }
 
   historyBtn.addEventListener('click', () => { renderHistoryList(); historyModal.classList.add('show'); });
+  howToBtn.addEventListener('click', () => howToModal.classList.add('show'));
+  howToCloseBtn.addEventListener('click', () => howToModal.classList.remove('show'));
+  howToModal.addEventListener('click', (e) => { if (e.target === howToModal) howToModal.classList.remove('show'); });
   historyCloseBtn.addEventListener('click', () => historyModal.classList.remove('show'));
   historyModal.addEventListener('click', (e) => { if (e.target === historyModal) historyModal.classList.remove('show'); });
   clearHistoryBtn.addEventListener('click', () => {
@@ -2495,20 +2767,33 @@
   // =====================================================================
   //  Token cards — many cards (Dockside Extortionist, Bitterblossom, etc.)
   //  create tokens (Treasure, Beast, Clue, Faerie Rogue…) during play, and
-  //  some grant emblems or similar one-off indicators (Monarch, Initiative…).
-  //  Scryfall marks these on the source card via `all_parts`, where each
-  //  related part with component === 'token' points at the token's own
-  //  card object (fetched separately for its image + alternate prints —
-  //  these all have prints_search_uri too, so the art-picker "just works").
-  //  Every distinct token TYPE gets exactly two physical copies printed,
-  //  once — regardless of how many different cards in the deck create it,
-  //  or how many copies of the source card there are. Emblems and similar
-  //  one-off indicators only ever need a single copy.
+  //  some grant emblems or similar one-off markers (Monarch, Initiative…).
+  //
+  //  Two detection paths, since Scryfall's `all_parts` (component === 'token')
+  //  reliably covers most literal "create a token" cards but is inconsistent
+  //  for emblem/marker grants:
+  //   1. all_parts, component === 'token' — the primary, cheap path.
+  //   2. Oracle text scanning — catches emblem/Monarch/Initiative grants that
+  //      all_parts misses. Emblems are found by the ability text quoted in
+  //      the granting card's own oracle text ("You get an emblem with
+  //      '...'"), since the emblem's NAME often shares nothing with the
+  //      source card's name — e.g. Oko, Lorwyn Liege's emblem is named
+  //      "Oko, Shadowmoor Scion Emblem" — so we search Scryfall by that
+  //      ability text instead of guessing a name.
+  //
+  //  Every distinct token/emblem/marker TYPE (by name) is added only once
+  //  per preview session, regardless of how many source cards call for it —
+  //  2 copies for ordinary tokens, 1 for emblems and similar one-off markers.
   // =====================================================================
 
   const MIN_TOKEN_COPIES = 2;
-  const tokenCardCache = new Map(); // scryfall id -> Promise<card|null>
-  let addedTokenNames = new Set(); // token/emblem names already added this preview session
+  const tokenCardCache = new Map();   // scryfall id -> Promise<card|null>
+  const specialCardCache = new Map(); // lookup key -> Promise<card|null>
+  let addedTokenNames = new Set();    // token/emblem names already added this preview session
+
+  const EMBLEM_ABILITY_RE = /you get an emblem with\s+["“]([^"”]+)["”]/i;
+  const MONARCH_RE = /\byou\s+become\s+the\s+monarch\b/i;
+  const INITIATIVE_RE = /\byou\s+take\s+the\s+initiative\b|\byou\s+get\s+the\s+initiative\b/i;
 
   function getTokenParts(card) {
     if (!card || !Array.isArray(card.all_parts)) return [];
@@ -2522,12 +2807,98 @@
     return p;
   }
 
+  function cardOracleText(card) {
+    if (!card) return '';
+    if (card.oracle_text) return card.oracle_text;
+    if (Array.isArray(card.card_faces)) return card.card_faces.map(f => f.oracle_text || '').join('\n');
+    return '';
+  }
+
+  function cardHasOracleGrant(card) {
+    const text = cardOracleText(card);
+    if (!text) return false;
+    return EMBLEM_ABILITY_RE.test(text) || MONARCH_RE.test(text) || INITIATIVE_RE.test(text);
+  }
+
+  async function scryfallNamedExact(name) {
+    try {
+      const res = await fetch(`https://api.scryfall.com/cards/named?exact=${encodeURIComponent(name)}`);
+      if (res.ok) return await res.json();
+    } catch (e) { /* ignore */ }
+    return null;
+  }
+
+  async function scryfallSearchFirst(query) {
+    try {
+      const res = await fetch(`https://api.scryfall.com/cards/search?q=${encodeURIComponent(query)}&unique=cards`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.data && data.data.length) return data.data[0];
+      }
+    } catch (e) { /* ignore */ }
+    return null;
+  }
+
+  // Finds the emblem matching a "You get an emblem with '<ability>'" grant
+  // by searching for an emblem card whose own oracle text contains that
+  // ability — far more reliable than guessing the emblem's name.
+  function fetchEmblemByAbilityText(abilityText) {
+    const cacheKey = 'emblem-text:' + abilityText.toLowerCase();
+    if (specialCardCache.has(cacheKey)) return specialCardCache.get(cacheKey);
+    const p = (async () => {
+      const clean = abilityText.replace(/"/g, "'").trim();
+      const snippet = clean.length > 90 ? clean.slice(0, 90) : clean;
+      let found = await scryfallSearchFirst(`layout:emblem oracle:"${snippet}"`);
+      if (found) return found;
+      const words = snippet.split(/\s+/).slice(0, 5).join(' ');
+      return await scryfallSearchFirst(`layout:emblem "${words}"`);
+    })();
+    specialCardCache.set(cacheKey, p);
+    return p;
+  }
+
+  function fetchNamedMarker(cacheKey, exactName, searchFallback) {
+    if (specialCardCache.has(cacheKey)) return specialCardCache.get(cacheKey);
+    const p = (async () => (await scryfallNamedExact(exactName)) || (await scryfallSearchFirst(searchFallback)))();
+    specialCardCache.set(cacheKey, p);
+    return p;
+  }
+
+  // Returns any emblem/marker cards implied by a source card's oracle text
+  // that aren't reliably linked via all_parts. Best-effort and cached.
+  async function fetchOracleTextGrants(card) {
+    const text = cardOracleText(card);
+    if (!text) return [];
+    const grants = [];
+
+    const abilityMatch = text.match(EMBLEM_ABILITY_RE);
+    if (abilityMatch) {
+      const emblem = await fetchEmblemByAbilityText(abilityMatch[1]);
+      if (emblem) grants.push(emblem);
+    }
+    if (MONARCH_RE.test(text)) {
+      const monarch = await fetchNamedMarker('monarch', 'Monarch Emblem', '(layout:token or layout:emblem) monarch');
+      if (monarch) grants.push(monarch);
+    }
+    if (INITIATIVE_RE.test(text)) {
+      const initiative = await fetchNamedMarker('initiative', 'The Initiative', '(layout:token or layout:emblem) initiative');
+      if (initiative) grants.push(initiative);
+    }
+    return grants;
+  }
+
+  function isEmblemLike(card) {
+    if (!card) return false;
+    if (card.layout === 'emblem') return true;
+    return /\bemblem\b|\bmonarch\b|\binitiative\b/i.test(card.name || '');
+  }
+
   // Adds the right number of copies of a single token/emblem card to
-  // previewSlots — 1 for emblems (or emblem-like indicators, which only
-  // ever exist once per game), 2 for ordinary tokens. `skipDupes` guards
-  // against the same name being added twice across different source cards;
-  // pass false for an explicit, deliberate add (e.g. from the token search
-  // box) so it always goes in.
+  // previewSlots — 1 for emblems (or emblem-like markers, which only ever
+  // exist once per game), 2 for ordinary tokens. `skipDupes` guards against
+  // the same name being added twice across different source cards; pass
+  // false for an explicit, deliberate add (e.g. from the token search box)
+  // so it always goes in.
   async function addTokenCopies(tokenCard, skipDupes) {
     if (!tokenCard) return 0;
     const key = (tokenCard.name || '').toLowerCase();
@@ -2537,7 +2908,7 @@
     }
     const faces = getCardFaceImages(tokenCard, 'large');
     if (!faces.length) return 0;
-    const isEmblem = tokenCard.layout === 'emblem';
+    const isEmblem = isEmblemLike(tokenCard);
     const copies = isEmblem ? 1 : MIN_TOKEN_COPIES;
     for (let n = 0; n < copies; n++) {
       const slot = makeSlotFromCard(tokenCard, 0, faces[0]);
@@ -2553,50 +2924,52 @@
     return addTokenCopies(tokenCard, true);
   }
 
-  // Auto-adds tokens for a single source card (used when a card is manually
-  // added via the regular "Add a card" search). Still deduplicated by name.
+  // Auto-adds tokens/emblems for a single source card (used when a card is
+  // manually added via the regular "Add a card" search). Still deduplicated
+  // by name.
   async function addTokenSlotsForCard(card) {
     if (!includeTokensToggle.checked) return 0;
-    const parts = getTokenParts(card);
-    if (!parts.length) return 0;
     let added = 0;
-    for (const part of parts) added += await addTokenSlotForPart(part);
+    for (const part of getTokenParts(card)) added += await addTokenSlotForPart(part);
+    for (const grant of await fetchOracleTextGrants(card)) added += await addTokenCopies(grant, true);
     return added;
   }
 
   // Bulk pass over the whole diff, run once when the print preview first
   // opens, with a visible progress indicator since it's a handful of extra
-  // network round-trips. Every distinct token type (by name) across every
-  // source card is fetched only once.
+  // network round-trips. Only cards that actually look like they produce a
+  // token/emblem/marker are checked.
   async function loadAndAppendTokenSlots() {
-    const partsByName = new Map(); // token name (lowercase) -> part
-    latestAdds.forEach(item => {
-      if (!item.card) return;
-      getTokenParts(item.card).forEach(part => {
-        const key = (part.name || '').toLowerCase();
-        if (key && !partsByName.has(key)) partsByName.set(key, part);
-      });
-    });
-    const parts = Array.from(partsByName.values());
-    if (!parts.length) return;
+    if (!includeTokensToggle.checked) return;
+
+    const candidates = latestAdds.filter(item =>
+      item.card && (getTokenParts(item.card).length || cardHasOracleGrant(item.card))
+    );
+    if (!candidates.length) return;
 
     showProgressBar(previewProgress, previewProgressFill);
     let done = 0;
     let addedTotal = 0;
-    previewStatus.textContent = `Fetching token cards… 0/${parts.length}`;
+    previewStatus.textContent = `Checking for tokens & emblems… 0/${candidates.length}`;
 
-    for (const part of parts) {
-      addedTotal += await addTokenSlotForPart(part);
+    for (const item of candidates) {
+      const card = item.card;
+      for (const part of getTokenParts(card)) {
+        addedTotal += await addTokenSlotForPart(part);
+      }
+      for (const grant of await fetchOracleTextGrants(card)) {
+        addedTotal += await addTokenCopies(grant, true);
+      }
       done++;
-      setProgressBar(previewProgressFill, done, parts.length);
-      previewStatus.textContent = `Fetching token cards… ${done}/${parts.length}`;
-      await new Promise(r => setTimeout(r, 50));
+      setProgressBar(previewProgressFill, done, candidates.length);
+      previewStatus.textContent = `Checking for tokens & emblems… ${done}/${candidates.length}`;
+      await new Promise(r => setTimeout(r, 40));
     }
 
     hideProgressBar(previewProgress, previewProgressFill);
     previewStatus.textContent = addedTotal
-      ? `Added ${addedTotal} token card${addedTotal === 1 ? '' : 's'}.`
-      : 'No token-producing cards found in this list.';
+      ? `Added ${addedTotal} token/emblem card${addedTotal === 1 ? '' : 's'}.`
+      : 'No token- or emblem-producing cards found in this list.';
     renderPreviewGrid();
   }
 
