@@ -162,6 +162,49 @@
     .inputs { grid-template-columns: 1fr; }
   }
 
+  /* ---------- Deck legality check ---------- */
+  .legality-panel { display: none; margin-bottom: 26px; }
+  .legality-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    margin-top: 10px;
+  }
+  @media (max-width: 760px) {
+    .legality-cols { grid-template-columns: 1fr; }
+  }
+  .legality-col {
+    background: linear-gradient(180deg, var(--panel), var(--panel-alt));
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .legality-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    padding: 5px 0;
+    color: var(--muted);
+  }
+  .legality-icon {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    margin-top: 1px;
+  }
+  .legality-row.ok .legality-icon { background: var(--green-bg); color: var(--green); }
+  .legality-row.bad .legality-icon { background: var(--red-bg); color: var(--red); }
+  .legality-row.neutral .legality-icon { background: var(--border-soft); color: var(--muted-dim); }
+  .legality-row.bad { color: var(--parchment); }
+
   /* ---------- Color identity charts ---------- */
   .color-charts {
     display: none;
@@ -240,6 +283,114 @@
   .cc-delta-pill.up .cc-delta-val { color: var(--green); }
   .cc-delta-pill.down .cc-delta-val { color: var(--red); }
 
+  .curve-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 120px;
+    padding-top: 10px;
+  }
+  .curve-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .curve-bar {
+    width: 100%;
+    max-width: 34px;
+    background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+    border-radius: 4px 4px 0 0;
+    min-height: 2px;
+    transition: height 0.2s ease;
+  }
+  .curve-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--parchment);
+    margin-top: 4px;
+    min-height: 13px;
+  }
+  .curve-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted-dim);
+    margin-top: 2px;
+  }
+
+  /* ---------- Mana base check ---------- */
+  .mana-base-panel { display: none; margin-bottom: 26px; }
+  .mana-base-table {
+    background: linear-gradient(180deg, var(--panel), var(--panel-alt));
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    margin-top: 10px;
+    overflow-x: auto;
+  }
+  .mb-row {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 0.8fr;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border-soft);
+    font-size: 12px;
+    min-width: 320px;
+  }
+  .mb-row:last-of-type { border-bottom: none; }
+  .mb-row.head {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted-dim);
+  }
+  .mb-color { font-family: 'Cinzel', serif; color: var(--parchment); display: flex; align-items: center; gap: 6px; }
+  .mb-swatch { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .mb-num { font-family: 'JetBrains Mono', monospace; color: var(--parchment); }
+  .mb-flag { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; }
+  .mb-flag.ok { color: var(--green); }
+  .mb-flag.warn { color: var(--amber); }
+  .mb-note {
+    font-size: 11px;
+    color: var(--muted-dim);
+    font-style: italic;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-soft);
+    min-width: 320px;
+  }
+
+  /* ---------- Budget swaps ---------- */
+  .budget-panel { display: none; margin: 0 0 30px; }
+  .budget-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .budget-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: linear-gradient(180deg, var(--panel), var(--panel-alt));
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: border-color 0.12s ease;
+  }
+  .budget-item:hover { border-color: var(--gold); }
+  .budget-item img { width: 44px; height: 61px; object-fit: cover; border-radius: 4px; flex-shrink: 0; background: var(--bg-alt); }
+  .budget-item-info { flex: 1; min-width: 0; }
+  .budget-item-name { font-family: 'Cinzel', serif; font-size: 13.5px; color: var(--parchment); }
+  .budget-item-detail { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+  .budget-item-detail .from { color: var(--red); text-decoration: line-through; opacity: 0.7; }
+  .budget-item-detail .to { color: var(--green); font-weight: 600; }
+  .budget-item-save {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--gold-bright);
+    flex-shrink: 0;
+    text-align: right;
+  }
+
   .card-panel {
     background: linear-gradient(180deg, var(--panel), var(--panel-alt));
     border: 1px solid var(--border);
@@ -278,6 +429,44 @@
     font-size: 12px;
     color: var(--muted-dim);
   }
+
+  .import-row { display: flex; gap: 8px; margin-bottom: 6px; }
+  .import-row input[type="text"] {
+    flex: 1;
+    min-width: 0;
+    background: var(--bg-alt);
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    color: var(--parchment);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    padding: 7px 10px;
+    outline: none;
+  }
+  .import-row input[type="text"]:focus { border-color: var(--gold); }
+  .import-row .btn-small { flex-shrink: 0; }
+  .import-status {
+    font-size: 11px;
+    color: var(--muted-dim);
+    margin-bottom: 8px;
+    min-height: 14px;
+  }
+  .import-status.err { color: var(--red); }
+  .import-status.ok { color: var(--green); }
+  .card-add-row { position: relative; margin-bottom: 8px; }
+  .card-add-row input[type="text"] {
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--bg-alt);
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    color: var(--parchment);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    padding: 7px 10px;
+    outline: none;
+  }
+  .card-add-row input[type="text"]:focus { border-color: var(--gold); }
 
   textarea {
     width: 100%;
@@ -1044,14 +1233,14 @@
   #compareBtn:hover { box-shadow: 0 4px 22px rgba(201, 162, 75, 0.4); }
   #compareBtn:disabled { opacity: 0.5; cursor: default; box-shadow: none; }
 
-  #sampleBtn, #clearBtn {
+  #sampleBtn, #clearBtn, #shareBtn {
     background: transparent;
     color: var(--muted);
     border: 1px solid var(--border);
     font-size: 12px;
     padding: 11px 20px;
   }
-  #sampleBtn:hover, #clearBtn:hover { color: var(--parchment); border-color: var(--gold); }
+  #sampleBtn:hover, #clearBtn:hover, #shareBtn:hover { color: var(--parchment); border-color: var(--gold); }
 
   .status {
     text-align: center;
@@ -1337,6 +1526,15 @@
         <span class="name">Original</span>
         <span class="count" id="countA">0 cards</span>
       </div>
+      <div class="import-row">
+        <input type="text" id="importUrlA" placeholder="Or paste a Moxfield/Archidekt deck URL…" autocomplete="off" />
+        <button class="btn-small" id="importBtnA">Import</button>
+      </div>
+      <div class="import-status" id="importStatusA"></div>
+      <div class="card-add-row">
+        <input type="text" id="cardAddInputA" placeholder="Add a single card by name…" autocomplete="off" />
+        <div class="autocomplete-list" id="cardAddResultsA"></div>
+      </div>
       <textarea id="listA" placeholder="4 Lightning Bolt&#10;2 Wandering Emperor&#10;1 Solitude&#10;&#10;// paste your original list here"></textarea>
     </div>
     <div class="card-panel">
@@ -1344,7 +1542,30 @@
         <span class="name">Updated</span>
         <span class="count" id="countB">0 cards</span>
       </div>
+      <div class="import-row">
+        <input type="text" id="importUrlB" placeholder="Or paste a Moxfield/Archidekt deck URL…" autocomplete="off" />
+        <button class="btn-small" id="importBtnB">Import</button>
+      </div>
+      <div class="import-status" id="importStatusB"></div>
+      <div class="card-add-row">
+        <input type="text" id="cardAddInputB" placeholder="Add a single card by name…" autocomplete="off" />
+        <div class="autocomplete-list" id="cardAddResultsB"></div>
+      </div>
       <textarea id="listB" placeholder="4 Lightning Bolt&#10;4 Fable of the Mirror-Breaker&#10;1 Solitude&#10;&#10;// paste your updated list here"></textarea>
+    </div>
+  </div>
+
+  <div class="legality-panel" id="legalityPanel">
+    <div class="cc-section-label">Deck Legality Check — heuristic, always double-check for important games</div>
+    <div class="legality-cols">
+      <div class="legality-col">
+        <div class="cc-title">Original</div>
+        <div id="legalityA"></div>
+      </div>
+      <div class="legality-col">
+        <div class="cc-title">Updated</div>
+        <div id="legalityB"></div>
+      </div>
     </div>
   </div>
 
@@ -1370,10 +1591,32 @@
     </div>
   </div>
 
+  <div class="color-charts" id="manaCurveCharts">
+    <div class="cc-section-label">Mana Curve — nonland cards by mana value</div>
+    <div class="color-chart-col">
+      <div class="cc-title">Original — Mana Curve</div>
+      <div class="curve-bars" id="curveA"></div>
+    </div>
+    <div class="color-chart-col">
+      <div class="cc-title">Updated — Mana Curve</div>
+      <div class="curve-bars" id="curveB"></div>
+    </div>
+    <div class="color-chart-delta">
+      <div class="cc-title">Change (Original → Updated)</div>
+      <div class="cc-delta-row" id="curveDeltaRow"></div>
+    </div>
+  </div>
+
+  <div class="mana-base-panel" id="manaBasePanel">
+    <div class="cc-section-label">Mana Base Check (Updated list) — weighted pips vs. color sources</div>
+    <div class="mana-base-table" id="manaBaseTable"></div>
+  </div>
+
   <div class="controls">
     <button id="sampleBtn">Load sample</button>
     <button id="compareBtn">Compare lists</button>
     <button id="clearBtn">Clear</button>
+    <button id="shareBtn">Copy Share Link</button>
   </div>
 
   <div class="status" id="status"></div>
@@ -1410,6 +1653,11 @@
       <b>Unrecognized names</b> — not found on Scryfall, shown without type or image.
       <div class="list" id="unrecognizedList"></div>
     </div>
+  </div>
+
+  <div class="budget-panel" id="budgetPanel">
+    <div class="cc-section-label">Cheaper Printings Available — same card, lower price</div>
+    <div class="budget-list" id="budgetList"></div>
   </div>
 
   <footer>Card data &amp; images via <a href="https://scryfall.com" target="_blank" rel="noopener">Scryfall</a>. Not affiliated with Wizards of the Coast.</footer>
@@ -1623,11 +1871,22 @@
 (function () {
   const listA = document.getElementById('listA');
   const listB = document.getElementById('listB');
+  const importUrlA = document.getElementById('importUrlA');
+  const importBtnA = document.getElementById('importBtnA');
+  const importStatusA = document.getElementById('importStatusA');
+  const importUrlB = document.getElementById('importUrlB');
+  const importBtnB = document.getElementById('importBtnB');
+  const importStatusB = document.getElementById('importStatusB');
+  const cardAddInputA = document.getElementById('cardAddInputA');
+  const cardAddResultsA = document.getElementById('cardAddResultsA');
+  const cardAddInputB = document.getElementById('cardAddInputB');
+  const cardAddResultsB = document.getElementById('cardAddResultsB');
   const countA = document.getElementById('countA');
   const countB = document.getElementById('countB');
   const compareBtn = document.getElementById('compareBtn');
   const sampleBtn = document.getElementById('sampleBtn');
   const clearBtn = document.getElementById('clearBtn');
+  const shareBtn = document.getElementById('shareBtn');
   const statusEl = document.getElementById('status');
   const results = document.getElementById('results');
   const cutList = document.getElementById('cutList');
@@ -1637,6 +1896,9 @@
   const cutTotalVal = document.getElementById('cutTotalVal');
   const addedTotalVal = document.getElementById('addedTotalVal');
   const colorCharts = document.getElementById('colorCharts');
+  const legalityPanel = document.getElementById('legalityPanel');
+  const legalityA = document.getElementById('legalityA');
+  const legalityB = document.getElementById('legalityB');
   const pieA = document.getElementById('pieA');
   const pieB = document.getElementById('pieB');
   const pieACenter = document.getElementById('pieACenter');
@@ -1644,10 +1906,18 @@
   const legendA = document.getElementById('legendA');
   const legendB = document.getElementById('legendB');
   const deltaRow = document.getElementById('deltaRow');
+  const manaCurveCharts = document.getElementById('manaCurveCharts');
+  const manaBasePanel = document.getElementById('manaBasePanel');
+  const manaBaseTable = document.getElementById('manaBaseTable');
+  const curveA = document.getElementById('curveA');
+  const curveB = document.getElementById('curveB');
+  const curveDeltaRow = document.getElementById('curveDeltaRow');
   const cutSummary = document.getElementById('cutSummary');
   const addedSummary = document.getElementById('addedSummary');
   const unrecognizedBox = document.getElementById('unrecognized');
   const unrecognizedList = document.getElementById('unrecognizedList');
+  const budgetPanel = document.getElementById('budgetPanel');
+  const budgetList = document.getElementById('budgetList');
   const preview = document.getElementById('cardPreview');
   const copyAddedBtn=document.getElementById('copyAddedBtn');
   const buildPdfBtn = document.getElementById('buildPdfBtn');
@@ -1736,6 +2006,10 @@
     updateCounts();
     results.classList.remove('show');
     colorCharts.style.display = 'none';
+    legalityPanel.style.display = 'none';
+    manaCurveCharts.style.display = 'none';
+    manaBasePanel.style.display = 'none';
+    budgetPanel.style.display = 'none';
     statusEl.textContent = '';
   });
 
@@ -1781,6 +2055,192 @@
   listA.addEventListener('input', updateCounts);
   listB.addEventListener('input', updateCounts);
   updateCounts();
+
+  // =====================================================================
+  //  Import a decklist directly from a Moxfield or Archidekt URL, so people
+  //  don't have to copy/paste from those sites by hand. Best-effort: if a
+  //  site's public API changes shape or blocks the request, this fails
+  //  gracefully with a message to paste the list manually instead.
+  // =====================================================================
+
+  async function fetchMoxfieldDeck(id) {
+    const res = await fetch(`https://api2.moxfield.com/v3/decks/all/${id}`);
+    if (!res.ok) throw new Error('Moxfield fetch failed');
+    return await res.json();
+  }
+
+  function linesFromMoxfieldData(data) {
+    const lines = [];
+    ['commanders', 'mainboard', 'companions'].forEach(boardKey => {
+      const board = data[boardKey];
+      if (!board) return;
+      Object.values(board).forEach(entry => {
+        const qty = entry.quantity || 1;
+        const name = (entry.card && entry.card.name) || entry.name;
+        if (name) lines.push(`${qty} ${name}`);
+      });
+    });
+    return lines;
+  }
+
+  async function fetchArchidektDeck(id) {
+    const res = await fetch(`https://archidekt.com/api/decks/${id}/`);
+    if (!res.ok) throw new Error('Archidekt fetch failed');
+    return await res.json();
+  }
+
+  function linesFromArchidektData(data) {
+    const lines = [];
+    (data.cards || []).forEach(entry => {
+      const cats = (entry.categories || []).join(' ').toLowerCase();
+      if (cats.includes('maybeboard') || cats.includes('sideboard')) return;
+      const qty = entry.quantity || 1;
+      const name = (entry.card && entry.card.oracleCard && entry.card.oracleCard.name) || (entry.card && entry.card.name);
+      if (name) lines.push(`${qty} ${name}`);
+    });
+    return lines;
+  }
+
+  async function importDeckFromUrl(url, targetTextarea, statusEl) {
+    statusEl.classList.remove('err', 'ok');
+    const trimmed = url.trim();
+    if (!trimmed) { statusEl.textContent = 'Paste a deck URL first.'; statusEl.classList.add('err'); return; }
+
+    let lines = null;
+    try {
+      let m;
+      if ((m = trimmed.match(/moxfield\.com\/decks\/([A-Za-z0-9_-]+)/i))) {
+        statusEl.textContent = 'Fetching from Moxfield…';
+        lines = linesFromMoxfieldData(await fetchMoxfieldDeck(m[1]));
+      } else if ((m = trimmed.match(/archidekt\.com\/decks\/(\d+)/i))) {
+        statusEl.textContent = 'Fetching from Archidekt…';
+        lines = linesFromArchidektData(await fetchArchidektDeck(m[1]));
+      } else {
+        statusEl.textContent = 'Only Moxfield and Archidekt deck URLs are supported right now.';
+        statusEl.classList.add('err');
+        return;
+      }
+    } catch (e) {
+      statusEl.textContent = "Couldn't fetch that deck — it may be private, or the site blocked the request. Paste the list manually instead.";
+      statusEl.classList.add('err');
+      return;
+    }
+
+    if (!lines || !lines.length) {
+      statusEl.textContent = 'No cards found in that deck.';
+      statusEl.classList.add('err');
+      return;
+    }
+
+    targetTextarea.value = lines.join('\n');
+    updateCounts();
+    statusEl.textContent = `Imported ${lines.length} line${lines.length === 1 ? '' : 's'}.`;
+    statusEl.classList.add('ok');
+  }
+
+  importBtnA.addEventListener('click', () => importDeckFromUrl(importUrlA.value, listA, importStatusA));
+  importBtnB.addEventListener('click', () => importDeckFromUrl(importUrlB.value, listB, importStatusB));
+  importUrlA.addEventListener('keydown', (e) => { if (e.key === 'Enter') importBtnA.click(); });
+  importUrlB.addEventListener('keydown', (e) => { if (e.key === 'Enter') importBtnB.click(); });
+
+  // =====================================================================
+  //  Individual card lookup for the Original/Updated boxes — search Scryfall
+  //  and add one card at a time without leaving the textarea workflow. If
+  //  the card's already on a line in the list, its quantity is bumped
+  //  in place instead of adding a duplicate line.
+  // =====================================================================
+
+  function addCardLineToTextarea(textarea, cardName) {
+    const lines = textarea.value.length ? textarea.value.split(/\r?\n/) : [];
+    const lowerName = cardName.toLowerCase();
+    let matched = false;
+
+    for (let i = 0; i < lines.length; i++) {
+      const raw = lines[i].trim();
+      if (!raw || raw.startsWith('//') || raw.startsWith('#')) continue;
+      const stripped = raw.replace(/\s*[\(\[][A-Za-z0-9]{2,6}[\)\]]\s*(#?\d+[a-z]?)?\s*\*?F?\s*$/i, '').trim();
+      const m = stripped.match(/^(\d+)\s*[xX]?\s+(.+)$/);
+      const qty = m ? parseInt(m[1], 10) : 1;
+      const name = m ? m[2].trim() : stripped;
+      if (name.toLowerCase() === lowerName) {
+        lines[i] = `${qty + 1} ${name}`;
+        matched = true;
+        break;
+      }
+    }
+
+    if (!matched) lines.push(`1 ${cardName}`);
+    textarea.value = lines.join('\n').replace(/^\n+/, '');
+  }
+
+  function createInlineCardSearch(inputEl, resultsEl, onSelect) {
+    let abortCtrl = null;
+    const run = debounce(async (query) => {
+      if (!query || query.trim().length < 2) {
+        resultsEl.classList.remove('show');
+        resultsEl.innerHTML = '';
+        return;
+      }
+      if (abortCtrl) abortCtrl.abort();
+      abortCtrl = new AbortController();
+      try {
+        const q = encodeURIComponent(query.trim());
+        const res = await fetch(`https://api.scryfall.com/cards/search?q=${q}&order=name&unique=cards`, { signal: abortCtrl.signal });
+        if (res.status === 404) {
+          resultsEl.innerHTML = '<div class="autocomplete-empty">No cards matched.</div>';
+          resultsEl.classList.add('show');
+          return;
+        }
+        if (!res.ok) throw new Error('search failed');
+        const data = await res.json();
+        const cards = (data.data || []).slice(0, 8);
+        resultsEl.innerHTML = '';
+        if (!cards.length) {
+          resultsEl.innerHTML = '<div class="autocomplete-empty">No cards matched.</div>';
+        } else {
+          cards.forEach(card => {
+            const item = document.createElement('div');
+            item.className = 'autocomplete-item';
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = card.name;
+            const typeSpan = document.createElement('span');
+            typeSpan.className = 'ac-type';
+            typeSpan.textContent = (card.set || '').toUpperCase();
+            item.appendChild(nameSpan);
+            item.appendChild(typeSpan);
+            item.addEventListener('click', () => {
+              onSelect(card);
+              inputEl.value = '';
+              resultsEl.classList.remove('show');
+            });
+            resultsEl.appendChild(item);
+          });
+        }
+        resultsEl.classList.add('show');
+      } catch (e) {
+        if (e.name === 'AbortError') return;
+        resultsEl.innerHTML = '<div class="autocomplete-empty">Search failed — check your connection.</div>';
+        resultsEl.classList.add('show');
+      }
+    }, 320);
+    inputEl.addEventListener('input', () => run(inputEl.value));
+    inputEl.addEventListener('focus', () => { if (resultsEl.innerHTML) resultsEl.classList.add('show'); });
+  }
+
+  createInlineCardSearch(cardAddInputA, cardAddResultsA, (card) => {
+    addCardLineToTextarea(listA, card.name);
+    updateCounts();
+  });
+  createInlineCardSearch(cardAddInputB, cardAddResultsB, (card) => {
+    addCardLineToTextarea(listB, card.name);
+    updateCounts();
+  });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.card-add-row')) {
+      cardAddResultsA.classList.remove('show');
+      cardAddResultsB.classList.remove('show');
+    }
+  });
 
   async function fetchCollection(names) {
     // names: array of display names (unique, case as typed)
@@ -2210,6 +2670,181 @@
   }
 
   // =====================================================================
+  //  Budget swaps — for the priciest cards in the Added list, checks
+  //  whether a meaningfully cheaper printing of the exact same card exists
+  //  (same rules text, different set/art/frame) and surfaces it. This is
+  //  deliberately narrow — a different, cheaper printing, not a different
+  //  card — so the suggestion is always a safe, functionally-identical swap.
+  // =====================================================================
+
+  async function findCheapestPrinting(card) {
+    if (!card || !card.prints_search_uri) return null;
+    try {
+      const res = await fetch(card.prints_search_uri);
+      if (!res.ok) return null;
+      const data = await res.json();
+      const prints = (data.data || []).filter(p => !p.games || p.games.includes('paper'));
+      let cheapest = null;
+      let cheapestPrice = Infinity;
+      prints.forEach(p => {
+        const price = cardPriceUsd(p);
+        if (price != null && price < cheapestPrice) { cheapestPrice = price; cheapest = p; }
+      });
+      return cheapest ? { card: cheapest, price: cheapestPrice } : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async function renderBudgetSwaps(adds, found) {
+    budgetPanel.style.display = 'none';
+    budgetList.innerHTML = '';
+
+    const priced = adds
+      .map(a => ({ card: found.get(a.key), price: cardPriceUsd(found.get(a.key)) }))
+      .filter(x => x.card && x.price != null)
+      .sort((x, y) => y.price - x.price)
+      .slice(0, 3);
+    if (!priced.length) return;
+
+    const cheaperResults = await Promise.all(priced.map(p => findCheapestPrinting(p.card)));
+    const suggestions = [];
+    priced.forEach((p, i) => {
+      const cheaper = cheaperResults[i];
+      if (!cheaper) return;
+      // Only worth flagging if it's meaningfully cheaper: at least $1 and at least 25% less.
+      if (cheaper.price < p.price - 1 && cheaper.price < p.price * 0.75) {
+        suggestions.push({ current: p, cheaper });
+      }
+    });
+    if (!suggestions.length) return;
+
+    budgetPanel.style.display = 'block';
+    suggestions.forEach(s => {
+      const item = document.createElement('div');
+      item.className = 'budget-item';
+      item.title = `View ${s.cheaper.card.name} (${s.cheaper.card.set_name || ''})`;
+
+      const img = document.createElement('img');
+      img.src = cardImageUrl(s.cheaper.card) || cardImageUrl(s.current.card) || '';
+      img.alt = s.current.card.name;
+      img.loading = 'lazy';
+      item.appendChild(img);
+
+      const info = document.createElement('div');
+      info.className = 'budget-item-info';
+
+      const nameEl = document.createElement('div');
+      nameEl.className = 'budget-item-name';
+      nameEl.textContent = s.current.card.name;
+      info.appendChild(nameEl);
+
+      const detail = document.createElement('div');
+      detail.className = 'budget-item-detail';
+      const fromSpan = document.createElement('span');
+      fromSpan.className = 'from';
+      fromSpan.textContent = `$${s.current.price.toFixed(2)} (${s.current.card.set_name || (s.current.card.set || '').toUpperCase()})`;
+      const toSpan = document.createElement('span');
+      toSpan.className = 'to';
+      toSpan.textContent = `$${s.cheaper.price.toFixed(2)} (${s.cheaper.card.set_name || (s.cheaper.card.set || '').toUpperCase()})`;
+      detail.appendChild(fromSpan);
+      detail.appendChild(document.createTextNode(' → '));
+      detail.appendChild(toSpan);
+      info.appendChild(detail);
+      item.appendChild(info);
+
+      const save = document.createElement('div');
+      save.className = 'budget-item-save';
+      save.textContent = `Save $${(s.current.price - s.cheaper.price).toFixed(2)}`;
+      item.appendChild(save);
+
+      item.addEventListener('click', () => openCardDetail(s.cheaper.card));
+      budgetList.appendChild(item);
+    });
+  }
+
+  // =====================================================================
+  //  Deck legality check — heuristic, not a rules engine. Flags the two
+  //  mistakes people actually make: singleton violations (basics and cards
+  //  that explicitly allow "any number" are exempt) and cards outside the
+  //  selected commander's color identity. Deck size is shown as a simple
+  //  count against 100, accounting for whether the commander line is
+  //  already present in the pasted list.
+  // =====================================================================
+
+  function isSingletonExempt(card) {
+    if (!card) return false;
+    if (isBasicLand(card)) return true;
+    const text = cardOracleText(card);
+    return /a deck can have (?:any number|up to [a-z0-9]+) (?:cop(?:y|ies)|cards named)/i.test(text);
+  }
+
+  function checkListLegality(map, found, commander) {
+    const issues = { totalQty: 0, overLimit: [], colorViolations: [] };
+    map.forEach((v, key) => {
+      issues.totalQty += v.qty;
+      const card = found.get(key);
+      if (v.qty > 1 && !isSingletonExempt(card)) {
+        issues.overLimit.push({ name: v.displayName, qty: v.qty });
+      }
+      if (commander && card && Array.isArray(card.color_identity)) {
+        const allowed = new Set(commander.color_identity || []);
+        const outside = card.color_identity.filter(c => !allowed.has(c));
+        if (outside.length) issues.colorViolations.push({ name: v.displayName, colors: outside });
+      }
+    });
+    return issues;
+  }
+
+  function legalityRow(el, ok, text) {
+    const row = document.createElement('div');
+    row.className = 'legality-row ' + (ok === true ? 'ok' : ok === false ? 'bad' : 'neutral');
+    const icon = document.createElement('span');
+    icon.className = 'legality-icon';
+    icon.textContent = ok === true ? '✓' : ok === false ? '!' : '·';
+    const label = document.createElement('span');
+    label.textContent = text;
+    row.appendChild(icon);
+    row.appendChild(label);
+    el.appendChild(row);
+  }
+
+  function renderLegalityColumn(el, map, found) {
+    el.innerHTML = '';
+    const issues = checkListLegality(map, found, selectedCommander);
+
+    if (selectedCommander) {
+      const hasCommanderInList = Array.from(map.values()).some(v => v.displayName.toLowerCase() === selectedCommander.name.toLowerCase());
+      const effectiveTotal = hasCommanderInList ? issues.totalQty : issues.totalQty + 1;
+      const sizeText = `${issues.totalQty} card${issues.totalQty === 1 ? '' : 's'}${hasCommanderInList ? '' : ' + commander'} = ${effectiveTotal}/100`;
+      legalityRow(el, effectiveTotal === 100, sizeText);
+    } else {
+      legalityRow(el, null, `${issues.totalQty} card${issues.totalQty === 1 ? '' : 's'} (pick a commander above to check against 100)`);
+    }
+
+    if (issues.overLimit.length) {
+      issues.overLimit.forEach(o => legalityRow(el, false, `${o.qty}× ${o.name} — singleton format allows only 1`));
+    } else {
+      legalityRow(el, true, 'No singleton violations');
+    }
+
+    if (selectedCommander) {
+      if (issues.colorViolations.length) {
+        issues.colorViolations.forEach(v => legalityRow(el, false, `${v.name} — outside ${selectedCommander.name}'s color identity (${v.colors.join('')})`));
+      } else {
+        legalityRow(el, true, `All cards match ${selectedCommander.name}'s color identity`);
+      }
+    }
+  }
+
+  function renderLegality(a, b, found) {
+    if (!a.size && !b.size) { legalityPanel.style.display = 'none'; return; }
+    legalityPanel.style.display = 'block';
+    renderLegalityColumn(legalityA, a, found);
+    renderLegalityColumn(legalityB, b, found);
+  }
+
+  // =====================================================================
   //  Color identity pie charts (Original vs Updated) + the delta between
   //  them. Each card is bucketed by its full color_identity: no colors ->
   //  Colorless, exactly one color -> that color, two+ -> Multicolor. Charts
@@ -2325,6 +2960,210 @@
     if (!deltaRow.children.length) {
       deltaRow.innerHTML = '<div class="cc-delta-empty">No color identity change.</div>';
     }
+  }
+
+  // =====================================================================
+  //  Mana curve chart (Original vs Updated) + delta. Lands are excluded
+  //  since they'd just pile up at CMC 0 and obscure the spell curve.
+  // =====================================================================
+
+  const CMC_BUCKETS = ['0', '1', '2', '3', '4', '5', '6+'];
+
+  function manaCurveCounts(map, found) {
+    const counts = { '0': 0, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6+': 0 };
+    let total = 0;
+    map.forEach((v, key) => {
+      const card = found.get(key);
+      if (!card) return;
+      const type = card.type_line || (card.card_faces && card.card_faces[0] && card.card_faces[0].type_line) || '';
+      if (/\bLand\b/i.test(type)) return;
+      const cmc = typeof card.cmc === 'number' ? card.cmc : 0;
+      const bucket = cmc >= 6 ? '6+' : String(Math.floor(cmc));
+      counts[bucket] += v.qty;
+      total += v.qty;
+    });
+    return { counts, total };
+  }
+
+  function renderCurveBars(el, counts) {
+    el.innerHTML = '';
+    const max = Math.max(1, ...CMC_BUCKETS.map(k => counts[k] || 0));
+    CMC_BUCKETS.forEach(k => {
+      const col = document.createElement('div');
+      col.className = 'curve-col';
+      const val = counts[k] || 0;
+      const bar = document.createElement('div');
+      bar.className = 'curve-bar';
+      bar.style.height = val ? `${Math.max(4, (val / max) * 100)}%` : '2px';
+      const count = document.createElement('div');
+      count.className = 'curve-count';
+      count.textContent = val || '';
+      const label = document.createElement('div');
+      label.className = 'curve-label';
+      label.textContent = k;
+      col.appendChild(bar);
+      col.appendChild(count);
+      col.appendChild(label);
+      el.appendChild(col);
+    });
+  }
+
+  function renderManaCurve(a, b, found) {
+    const { counts: countsA, total: totalA } = manaCurveCounts(a, found);
+    const { counts: countsB, total: totalB } = manaCurveCounts(b, found);
+
+    if (!totalA && !totalB) {
+      manaCurveCharts.style.display = 'none';
+      return;
+    }
+    manaCurveCharts.style.display = 'grid';
+
+    renderCurveBars(curveA, countsA);
+    renderCurveBars(curveB, countsB);
+
+    curveDeltaRow.innerHTML = '';
+    CMC_BUCKETS.forEach(k => {
+      const diff = (countsB[k] || 0) - (countsA[k] || 0);
+      if (diff === 0) return;
+      const pill = document.createElement('div');
+      pill.className = 'cc-delta-pill ' + (diff > 0 ? 'up' : 'down');
+      const label = document.createElement('span');
+      label.textContent = `CMC ${k}`;
+      const val = document.createElement('span');
+      val.className = 'cc-delta-val';
+      val.textContent = diff > 0 ? `+${diff}` : `${diff}`;
+      pill.appendChild(label);
+      pill.appendChild(val);
+      curveDeltaRow.appendChild(pill);
+    });
+    if (!curveDeltaRow.children.length) {
+      curveDeltaRow.innerHTML = '<div class="cc-delta-empty">No change in mana curve.</div>';
+    }
+  }
+
+  // =====================================================================
+  //  Mana base check — weighted pip count (color symbols in casting costs)
+  //  vs. color source count (lands and mana rocks/dorks that can produce
+  //  that color), for the Updated list against the selected commander's
+  //  color identity. Approximate — only counts explicit mana symbols, so
+  //  "add one mana of any color" effects aren't attributed to a color.
+  // =====================================================================
+
+  function countPips(manaCost) {
+    const counts = { W: 0, U: 0, B: 0, R: 0, G: 0 };
+    if (!manaCost) return counts;
+    const symbols = manaCost.match(/\{[^}]+\}/g) || [];
+    symbols.forEach(sym => {
+      const inner = sym.slice(1, -1);
+      ['W', 'U', 'B', 'R', 'G'].forEach(c => { if (inner.includes(c)) counts[c]++; });
+    });
+    return counts;
+  }
+
+  function countAllPips(map, found) {
+    const counts = { W: 0, U: 0, B: 0, R: 0, G: 0 };
+    map.forEach((v, key) => {
+      const card = found.get(key);
+      if (!card) return;
+      const type = card.type_line || (card.card_faces && card.card_faces[0] && card.card_faces[0].type_line) || '';
+      if (/\bLand\b/i.test(type)) return;
+      const mc = card.mana_cost || (card.card_faces && card.card_faces[0] && card.card_faces[0].mana_cost) || '';
+      const pips = countPips(mc);
+      ['W', 'U', 'B', 'R', 'G'].forEach(c => { counts[c] += pips[c] * v.qty; });
+    });
+    return counts;
+  }
+
+  function countManaSources(map, found) {
+    const counts = { W: 0, U: 0, B: 0, R: 0, G: 0 };
+    let landCount = 0;
+    const basicByColor = { Plains: 'W', Island: 'U', Swamp: 'B', Mountain: 'R', Forest: 'G' };
+    map.forEach((v, key) => {
+      const card = found.get(key);
+      if (!card) return;
+      const type = card.type_line || (card.card_faces && card.card_faces[0] && card.card_faces[0].type_line) || '';
+      const isLand = /\bLand\b/i.test(type);
+      if (isLand) landCount += v.qty;
+
+      const produced = new Set();
+      Object.keys(basicByColor).forEach(landType => {
+        if (isLand && type.includes(landType)) produced.add(basicByColor[landType]);
+      });
+      const text = cardOracleText(card);
+      const addMatches = text.match(/Add\s+(?:\{[^}]+\}\s*){1,6}/gi) || [];
+      addMatches.forEach(m => {
+        const syms = m.match(/\{[^}]+\}/g) || [];
+        syms.forEach(sym => {
+          const inner = sym.slice(1, -1);
+          ['W', 'U', 'B', 'R', 'G'].forEach(c => { if (inner.includes(c)) produced.add(c); });
+        });
+      });
+      produced.forEach(c => { counts[c] += v.qty; });
+    });
+    return { counts, landCount };
+  }
+
+  function renderManaBase(b, found) {
+    const identity = selectedCommander ? (selectedCommander.color_identity || []) : [];
+    if (!b.size || !identity.length) {
+      manaBasePanel.style.display = 'none';
+      return;
+    }
+
+    const pips = countAllPips(b, found);
+    const { counts: sources, landCount } = countManaSources(b, found);
+    const totalPips = identity.reduce((s, c) => s + pips[c], 0);
+
+    manaBasePanel.style.display = 'block';
+    manaBaseTable.innerHTML = '';
+
+    const head = document.createElement('div');
+    head.className = 'mb-row head';
+    ['Color', 'Pips (wtd.)', 'Sources', 'Check'].forEach(t => {
+      const s = document.createElement('span');
+      s.textContent = t;
+      head.appendChild(s);
+    });
+    manaBaseTable.appendChild(head);
+
+    identity.forEach(c => {
+      const row = document.createElement('div');
+      row.className = 'mb-row';
+
+      const colorSpan = document.createElement('span');
+      colorSpan.className = 'mb-color';
+      const sw = document.createElement('span');
+      sw.className = 'mb-swatch';
+      sw.style.background = CI_META[c].color;
+      colorSpan.appendChild(sw);
+      colorSpan.appendChild(document.createTextNode(CI_META[c].label));
+      row.appendChild(colorSpan);
+
+      const pipSpan = document.createElement('span');
+      pipSpan.className = 'mb-num';
+      pipSpan.textContent = pips[c];
+      row.appendChild(pipSpan);
+
+      const srcSpan = document.createElement('span');
+      srcSpan.className = 'mb-num';
+      srcSpan.textContent = sources[c];
+      row.appendChild(srcSpan);
+
+      const flagSpan = document.createElement('span');
+      const pipShare = totalPips ? pips[c] / totalPips : 0;
+      const sourceShare = landCount ? sources[c] / landCount : 0;
+      const low = pipShare > 0.08 && sourceShare < pipShare * 0.55;
+      flagSpan.className = 'mb-flag ' + (low ? 'warn' : 'ok');
+      flagSpan.textContent = low ? 'Light' : 'OK';
+      row.appendChild(flagSpan);
+
+      manaBaseTable.appendChild(row);
+    });
+
+    const note = document.createElement('div');
+    note.className = 'mb-note';
+    note.textContent = `Approximate — counts explicit mana symbols only (${landCount} lands found, plus any mana rocks/dorks). Not a substitute for careful mana-base tuning.`;
+    manaBaseTable.appendChild(note);
   }
 
   // Returns the printable image(s) for a card, aware of double-faced layouts.
@@ -2455,6 +3294,10 @@
     if (a.size === 0 && b.size === 0) {
       statusEl.textContent = 'Add cards to at least one list first.';
       colorCharts.style.display = 'none';
+      legalityPanel.style.display = 'none';
+      manaCurveCharts.style.display = 'none';
+      manaBasePanel.style.display = 'none';
+      budgetPanel.style.display = 'none';
       return;
     }
 
@@ -2481,10 +3324,14 @@
     const { found, notFound } = await fetchCollection(allNames);
 
     renderColorCharts(a, b, found);
+    renderLegality(a, b, found);
+    renderManaCurve(a, b, found);
+    renderManaBase(b, found);
 
     if (cuts.length === 0 && adds.length === 0) {
       statusEl.textContent = 'No differences found — the two lists match.';
       results.classList.remove('show');
+      budgetPanel.style.display = 'none';
       compareBtn.disabled = false;
       return;
     }
@@ -2492,6 +3339,7 @@
     cuts.sort((x, y) => y.qty - x.qty || x.name.localeCompare(y.name));
     adds.sort((x, y) => y.qty - x.qty || x.name.localeCompare(y.name));
     latestAdds = adds.map(a => ({ ...a, card: found.get(a.key) || null }));
+    renderBudgetSwaps(adds, found);
 
     cutList.innerHTML = '';
     addedList.innerHTML = '';
@@ -3850,6 +4698,65 @@
     }
     loadEdhrecBtn.disabled = false;
   });
+
+  // =====================================================================
+  //  Share link — encodes both lists (and the selected commander, if any)
+  //  into the URL's hash fragment, which never leaves the browser (no
+  //  server involved), so it works fine on a static page. Opening a shared
+  //  link restores both lists and re-runs the comparison automatically.
+  // =====================================================================
+
+  function encodeShareData(obj) {
+    const json = JSON.stringify(obj);
+    return btoa(unescape(encodeURIComponent(json)));
+  }
+
+  function decodeShareData(str) {
+    try {
+      const json = decodeURIComponent(escape(atob(str)));
+      return JSON.parse(json);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  shareBtn.addEventListener('click', async () => {
+    const data = { a: listA.value, b: listB.value, c: selectedCommander ? selectedCommander.name : null };
+    const encoded = encodeShareData(data);
+    const url = `${location.origin}${location.pathname}#share=${encoded}`;
+    const original = shareBtn.textContent;
+    try {
+      if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error('no clipboard API');
+      await navigator.clipboard.writeText(url);
+      shareBtn.textContent = 'Link Copied!';
+    } catch (e) {
+      window.prompt('Copy this link:', url);
+      shareBtn.textContent = 'Link Ready';
+    }
+    setTimeout(() => { shareBtn.textContent = original; }, 1800);
+  });
+
+  async function loadFromShareHash() {
+    const hash = location.hash || '';
+    const m = hash.match(/#share=([^&]+)/);
+    if (!m) return;
+    const data = decodeShareData(decodeURIComponent(m[1]));
+    if (!data) return;
+
+    if (typeof data.a === 'string') listA.value = data.a;
+    if (typeof data.b === 'string') listB.value = data.b;
+    updateCounts();
+
+    if (data.c) {
+      try {
+        const card = await scryfallNamedExact(data.c);
+        if (card) selectCommander(card);
+      } catch (e) { /* lists are still populated even if this fails */ }
+    }
+
+    if (listA.value.trim() || listB.value.trim()) compareBtn.click();
+  }
+  loadFromShareHash();
 })();
 </script>
 </body>
