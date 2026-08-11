@@ -84,6 +84,83 @@
     line-height: 1.5;
   }
 
+  /* ---------- Mode select landing screen ---------- */
+  .mode-select { display: block; max-width: 720px; margin: 0 auto 40px; }
+  .mode-select-title {
+    text-align: center;
+    font-family: 'Cinzel', serif;
+    font-size: 17px;
+    letter-spacing: 0.04em;
+    color: var(--gold-bright);
+    margin-bottom: 20px;
+  }
+  .mode-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 640px) {
+    .mode-cards { grid-template-columns: 1fr; }
+  }
+  .mode-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+    background: linear-gradient(180deg, var(--panel), var(--panel-alt));
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 22px;
+    cursor: pointer;
+    color: inherit;
+    font: inherit;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .mode-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+  .mode-card-icon { font-size: 34px; margin-bottom: 4px; }
+  .mode-card-title {
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    letter-spacing: 0.03em;
+    color: var(--parchment);
+  }
+  .mode-card-desc { color: var(--muted); font-size: 12.5px; line-height: 1.55; }
+
+  /* ---------- App body (hidden until a mode is chosen) ---------- */
+  .app-body { display: none; }
+  .change-mode-btn {
+    display: block;
+    margin: 0 0 26px;
+    background: none;
+    border: none;
+    color: var(--muted-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    padding: 0;
+  }
+  .change-mode-btn:hover { color: var(--gold-bright); }
+
+  /* Build mode: hide the "before" side of things that only make sense as
+     a diff (Original list, the empty Cut column, and the Original half of
+     each comparison chart), since a fresh build has nothing to diff against. */
+  body.mode-build #inputsSection .card-panel:first-child { display: none; }
+  body.mode-build #inputsSection .import-row,
+  body.mode-build #inputsSection .import-status { display: none; }
+  body.mode-build #results .col:first-child { display: none; }
+  body.mode-build #results .columns { grid-template-columns: 1fr; }
+  body.mode-build #legalityPanel .legality-col:first-of-type { display: none; }
+  body.mode-build #legalityPanel .legality-cols { grid-template-columns: 1fr; }
+  body.mode-build #colorCharts .color-chart-col:first-of-type,
+  body.mode-build #manaCurveCharts .color-chart-col:first-of-type,
+  body.mode-build #colorCharts .color-chart-delta,
+  body.mode-build #manaCurveCharts .color-chart-delta { display: none; }
+  body.mode-build #colorCharts,
+  body.mode-build #manaCurveCharts { grid-template-columns: 1fr; }
+  body.mode-build #sampleBtn { display: none; }
+
   /* ---------- Trending commanders strip ---------- */
   .trending-commanders {
     margin: 28px 0 26px;
@@ -585,6 +662,7 @@
     border-top: 1px solid var(--border-soft);
   }
   .lookup-selected.show { display: block; }
+  #clearPartnerBtn { margin-top: 12px; }
   .sel-header {
     display: flex;
     align-items: center;
@@ -1451,10 +1529,29 @@
     <div class="pips">
       <div class="pip w"></div><div class="pip u"></div><div class="pip b"></div><div class="pip r"></div><div class="pip g"></div>
     </div>
-    <p class="subtitle">Paste two versions of a decklist to see exactly what changed — price totals, color identity shifts, and all — then turn the new additions into a print-ready proxy sheet with alternate arts, tokens, and emblems included automatically. Click any card for its full text and rulings, courtesy of Scryfall.</p>
+    <p class="subtitle">Build a fresh Commander decklist from scratch, or upgrade an existing one and see exactly what changed — price totals, color identity, mana curve, and legality checks along the way, plus a print-ready proxy sheet for whatever's new.</p>
   </header>
 
-  <div class="trending-commanders">
+  <div class="mode-select" id="modeSelect">
+    <div class="mode-select-title">What would you like to do?</div>
+    <div class="mode-cards">
+      <button type="button" class="mode-card" id="modeBuildBtn">
+        <div class="mode-card-icon">🛠️</div>
+        <div class="mode-card-title">Build a Deck</div>
+        <div class="mode-card-desc">Pick a commander and build a fresh decklist from scratch — search, price, and analyze as you go.</div>
+      </button>
+      <button type="button" class="mode-card" id="modeUpgradeBtn">
+        <div class="mode-card-icon">📈</div>
+        <div class="mode-card-title">Upgrade a Deck</div>
+        <div class="mode-card-desc">Compare an existing decklist against an upgraded version to see exactly what changed.</div>
+      </button>
+    </div>
+  </div>
+
+  <div class="app-body" id="appBody">
+    <button type="button" class="change-mode-btn" id="changeModeBtn">← Choose a different mode</button>
+
+    <div class="trending-commanders">
     <div class="trending-label">Popular Commanders</div>
     <div class="trending-scroll">
       <div class="trending-row" id="trendingRow">
@@ -1468,8 +1565,8 @@
     <div class="lookup-sub">Search for a commander (or roll the dice for a random one), then pull in its precon list or an EDHREC-style average decklist.</div>
     <div class="lookup-search-row">
       <div class="lookup-search-inputs">
-        <input type="text" id="commanderSearch" placeholder="Search a legendary creature…" autocomplete="off" />
-        <button type="button" id="randomCommanderBtn" class="random-btn" title="Random legendary creature">🎲</button>
+        <input type="text" id="commanderSearch" placeholder="Search a commander…" autocomplete="off" />
+        <button type="button" id="randomCommanderBtn" class="random-btn" title="Random commander">🎲</button>
       </div>
       <div class="autocomplete-list" id="commanderResults"></div>
     </div>
@@ -1520,7 +1617,29 @@
     </div>
   </div>
 
-  <div class="inputs">
+  <div class="lookup-panel partner-panel" id="partnerPanel" style="display:none;">
+    <div class="lookup-title">Partner Commander</div>
+    <div class="lookup-sub" id="partnerSub">This commander has Partner — search for another Partner creature to pair with it. Their color identities combine for legality and mana-base checks.</div>
+    <div class="lookup-search-row">
+      <div class="lookup-search-inputs">
+        <input type="text" id="partnerSearch" placeholder="Search another Partner creature…" autocomplete="off" />
+      </div>
+      <div class="autocomplete-list" id="partnerResults"></div>
+    </div>
+
+    <div class="lookup-selected" id="partnerSelected">
+      <div class="sel-header">
+        <img class="sel-image" id="partnerSelImage" alt="" />
+        <div>
+          <div class="sel-name" id="partnerSelName"></div>
+          <div class="sel-type" id="partnerSelType"></div>
+        </div>
+      </div>
+      <button class="btn-small" id="clearPartnerBtn">Remove Partner</button>
+    </div>
+  </div>
+
+  <div class="inputs" id="inputsSection">
     <div class="card-panel">
       <div class="panel-label">
         <span class="name">Original</span>
@@ -1539,7 +1658,7 @@
     </div>
     <div class="card-panel">
       <div class="panel-label">
-        <span class="name">Updated</span>
+        <span class="name" id="panelLabelB">Updated</span>
         <span class="count" id="countB">0 cards</span>
       </div>
       <div class="import-row">
@@ -1658,6 +1777,8 @@
   <div class="budget-panel" id="budgetPanel">
     <div class="cc-section-label">Cheaper Printings Available — same card, lower price</div>
     <div class="budget-list" id="budgetList"></div>
+  </div>
+
   </div>
 
   <footer>Card data &amp; images via <a href="https://scryfall.com" target="_blank" rel="noopener">Scryfall</a>. Not affiliated with Wizards of the Coast.</footer>
@@ -1930,12 +2051,50 @@
   // ---- History DOM refs ----
   const historyBtn = document.getElementById('historyBtn');
   const howToBtn = document.getElementById('howToBtn');
+  const modeSelect = document.getElementById('modeSelect');
+  const modeBuildBtn = document.getElementById('modeBuildBtn');
+  const modeUpgradeBtn = document.getElementById('modeUpgradeBtn');
+  const appBody = document.getElementById('appBody');
+  const changeModeBtn = document.getElementById('changeModeBtn');
+  const panelLabelB = document.getElementById('panelLabelB');
   const howToModal = document.getElementById('howToModal');
   const howToCloseBtn = document.getElementById('howToCloseBtn');
   const historyModal = document.getElementById('historyModal');
   const historyCloseBtn = document.getElementById('historyCloseBtn');
   const clearHistoryBtn = document.getElementById('clearHistoryBtn');
   const historyList = document.getElementById('historyList');
+
+  // =====================================================================
+  //  Mode select — landing screen chooses between "Build a Deck" (a single
+  //  decklist box, commander lookup, and card search — everything shows up
+  //  as Added since there's nothing to diff against) and "Upgrade a Deck"
+  //  (the original Original/Updated comparison workflow).
+  // =====================================================================
+
+  let currentMode = null; // 'build' | 'upgrade' | null (still on the landing screen)
+
+  function enterMode(mode) {
+    currentMode = mode;
+    modeSelect.style.display = 'none';
+    appBody.style.display = 'block';
+    document.body.classList.remove('mode-build', 'mode-upgrade');
+    document.body.classList.add('mode-' + mode);
+    compareBtn.textContent = mode === 'build' ? 'Build' : 'Compare lists';
+    panelLabelB.textContent = mode === 'build' ? 'Your Decklist' : 'Updated';
+    if (mode === 'build' && listA.value.trim()) {
+      listA.value = '';
+      updateCounts();
+    }
+  }
+
+  modeBuildBtn.addEventListener('click', () => enterMode('build'));
+  modeUpgradeBtn.addEventListener('click', () => enterMode('upgrade'));
+  changeModeBtn.addEventListener('click', () => {
+    currentMode = null;
+    modeSelect.style.display = 'block';
+    appBody.style.display = 'none';
+    document.body.classList.remove('mode-build', 'mode-upgrade');
+  });
 
   // ---- PDF Preview modal DOM refs ----
   const previewModal = document.getElementById('previewModal');
@@ -1970,6 +2129,15 @@
   // ---- Commander Lookup DOM refs ----
   const commanderSearch = document.getElementById('commanderSearch');
   const randomCommanderBtn = document.getElementById('randomCommanderBtn');
+  const partnerPanel = document.getElementById('partnerPanel');
+  const partnerSub = document.getElementById('partnerSub');
+  const partnerSearch = document.getElementById('partnerSearch');
+  const partnerResults = document.getElementById('partnerResults');
+  const partnerSelected = document.getElementById('partnerSelected');
+  const partnerSelImage = document.getElementById('partnerSelImage');
+  const partnerSelName = document.getElementById('partnerSelName');
+  const partnerSelType = document.getElementById('partnerSelType');
+  const clearPartnerBtn = document.getElementById('clearPartnerBtn');
   const trendingRow = document.getElementById('trendingRow');
   const commanderResults = document.getElementById('commanderResults');
   const lookupSelected = document.getElementById('lookupSelected');
@@ -1989,6 +2157,35 @@
   const loadEdhrecBtn = document.getElementById('loadEdhrecBtn');
   const edhrecStatus = document.getElementById('edhrecStatus');
   let selectedCommander = null; // Scryfall card object
+  let selectedPartner = null; // Scryfall card object, for commanders with plain "Partner"
+
+  function cardHasPlainPartner(card) {
+    if (!card) return false;
+    const text = cardOracleText(card);
+    return /\bPartner\b/i.test(text) && !/\bPartner with\b/i.test(text);
+  }
+
+  function cardPartnerWithName(card) {
+    if (!card) return null;
+    const text = cardOracleText(card);
+    const m = text.match(/\bPartner with ([^.\n(]+)/i);
+    return m ? m[1].trim() : null;
+  }
+
+  // The color identity that actually matters for legality/mana-base checks:
+  // the selected commander's alone, or the union with its partner's if one
+  // is paired (Partner commanders combine color identities).
+  function combinedCommanderColorIdentity() {
+    if (!selectedCommander) return [];
+    const set = new Set(selectedCommander.color_identity || []);
+    if (selectedPartner) (selectedPartner.color_identity || []).forEach(c => set.add(c));
+    return Array.from(set);
+  }
+
+  function combinedCommanderLabel() {
+    if (!selectedCommander) return '';
+    return selectedPartner ? `${selectedCommander.name} + ${selectedPartner.name}` : selectedCommander.name;
+  }
   let preconMatches = [];       // [{fileName, deckName, code, releaseDate}]
 
   const SAMPLE_A = `4 Lightning Bolt\n4 Monastery Swiftspear\n3 Wandering Emperor\n1 Solitude\n2 Fury\n4 Fatal Push\n20 Mountain\n4 Sacred Foundry`;
@@ -2779,7 +2976,7 @@
     return /a deck can have (?:any number|up to [a-z0-9]+) (?:cop(?:y|ies)|cards named)/i.test(text);
   }
 
-  function checkListLegality(map, found, commander) {
+  function checkListLegality(map, found, colorIdentity) {
     const issues = { totalQty: 0, overLimit: [], colorViolations: [] };
     map.forEach((v, key) => {
       issues.totalQty += v.qty;
@@ -2787,8 +2984,8 @@
       if (v.qty > 1 && !isSingletonExempt(card)) {
         issues.overLimit.push({ name: v.displayName, qty: v.qty });
       }
-      if (commander && card && Array.isArray(card.color_identity)) {
-        const allowed = new Set(commander.color_identity || []);
+      if (colorIdentity.length && card && Array.isArray(card.color_identity)) {
+        const allowed = new Set(colorIdentity);
         const outside = card.color_identity.filter(c => !allowed.has(c));
         if (outside.length) issues.colorViolations.push({ name: v.displayName, colors: outside });
       }
@@ -2811,12 +3008,16 @@
 
   function renderLegalityColumn(el, map, found) {
     el.innerHTML = '';
-    const issues = checkListLegality(map, found, selectedCommander);
+    const colorIdentity = combinedCommanderColorIdentity();
+    const issues = checkListLegality(map, found, colorIdentity);
+    const commanderNames = [selectedCommander, selectedPartner].filter(Boolean).map(c => c.name.toLowerCase());
 
     if (selectedCommander) {
-      const hasCommanderInList = Array.from(map.values()).some(v => v.displayName.toLowerCase() === selectedCommander.name.toLowerCase());
-      const effectiveTotal = hasCommanderInList ? issues.totalQty : issues.totalQty + 1;
-      const sizeText = `${issues.totalQty} card${issues.totalQty === 1 ? '' : 's'}${hasCommanderInList ? '' : ' + commander'} = ${effectiveTotal}/100`;
+      const namesInList = new Set(Array.from(map.values()).map(v => v.displayName.toLowerCase()));
+      const missing = commanderNames.filter(n => !namesInList.has(n));
+      const effectiveTotal = issues.totalQty + missing.length;
+      const suffix = missing.length ? (missing.length === 1 ? ' + commander' : ' + commanders') : '';
+      const sizeText = `${issues.totalQty} card${issues.totalQty === 1 ? '' : 's'}${suffix} = ${effectiveTotal}/100`;
       legalityRow(el, effectiveTotal === 100, sizeText);
     } else {
       legalityRow(el, null, `${issues.totalQty} card${issues.totalQty === 1 ? '' : 's'} (pick a commander above to check against 100)`);
@@ -2829,10 +3030,11 @@
     }
 
     if (selectedCommander) {
+      const label = combinedCommanderLabel();
       if (issues.colorViolations.length) {
-        issues.colorViolations.forEach(v => legalityRow(el, false, `${v.name} — outside ${selectedCommander.name}'s color identity (${v.colors.join('')})`));
+        issues.colorViolations.forEach(v => legalityRow(el, false, `${v.name} — outside ${label}'s color identity (${v.colors.join('')})`));
       } else {
-        legalityRow(el, true, `All cards match ${selectedCommander.name}'s color identity`);
+        legalityRow(el, true, `All cards match ${label}'s color identity`);
       }
     }
   }
@@ -3104,7 +3306,7 @@
   }
 
   function renderManaBase(b, found) {
-    const identity = selectedCommander ? (selectedCommander.color_identity || []) : [];
+    const identity = combinedCommanderColorIdentity();
     if (!b.size || !identity.length) {
       manaBasePanel.style.display = 'none';
       return;
@@ -4266,10 +4468,10 @@
     if (searchAbort) searchAbort.abort();
     searchAbort = new AbortController();
     try {
-      const q = encodeURIComponent(`t:legendary t:creature ${query.trim()}`);
+      const q = encodeURIComponent(`is:commander ${query.trim()}`);
       const res = await fetch(`https://api.scryfall.com/cards/search?q=${q}&order=edhrec&unique=cards`, { signal: searchAbort.signal });
       if (res.status === 404) {
-        commanderResults.innerHTML = '<div class="autocomplete-empty">No legendary creatures matched.</div>';
+        commanderResults.innerHTML = '<div class="autocomplete-empty">No commanders matched.</div>';
         commanderResults.classList.add('show');
         return;
       }
@@ -4278,7 +4480,7 @@
       const cards = (data.data || []).slice(0, 8);
       commanderResults.innerHTML = '';
       if (!cards.length) {
-        commanderResults.innerHTML = '<div class="autocomplete-empty">No legendary creatures matched.</div>';
+        commanderResults.innerHTML = '<div class="autocomplete-empty">No commanders matched.</div>';
       } else {
         cards.forEach(card => {
           const item = document.createElement('div');
@@ -4312,7 +4514,10 @@
     }
   });
   document.addEventListener('click', (e) => {
-    if (!e.target.closest('.lookup-search-row')) commanderResults.classList.remove('show');
+    if (!e.target.closest('.lookup-search-row')) {
+      commanderResults.classList.remove('show');
+      partnerResults.classList.remove('show');
+    }
   });
 
   randomCommanderBtn.addEventListener('click', async () => {
@@ -4320,7 +4525,7 @@
     const original = randomCommanderBtn.textContent;
     randomCommanderBtn.textContent = '…';
     try {
-      const q = encodeURIComponent('is:commander type:creature');
+      const q = encodeURIComponent('is:commander');
       const res = await fetch(`https://api.scryfall.com/cards/random?q=${q}`);
       if (res.ok) {
         const card = await res.json();
@@ -4362,7 +4567,119 @@
     edhrecStatus.className = 'lookup-status';
 
     findPreconsForCommander(card);
+    updatePartnerPanelForCommander(card);
   }
+
+  // =====================================================================
+  //  Partner Commander lookup — shown only when the selected commander has
+  //  plain "Partner" (or the specific "Partner with <name>" variant). Their
+  //  color identities combine for the legality and mana-base checks above.
+  // =====================================================================
+
+  function updatePartnerPanelForCommander(card) {
+    selectedPartner = null;
+    partnerSelected.classList.remove('show');
+    partnerResults.classList.remove('show');
+    partnerResults.innerHTML = '';
+
+    const fixedName = cardPartnerWithName(card);
+    const plainPartner = cardHasPlainPartner(card);
+
+    if (fixedName) {
+      partnerPanel.style.display = 'block';
+      partnerSub.textContent = `This commander partners specifically with ${fixedName} — search below to add it. Color identities combine for legality and mana-base checks.`;
+      partnerSearch.value = fixedName;
+      runPartnerSearch(fixedName);
+    } else if (plainPartner) {
+      partnerPanel.style.display = 'block';
+      partnerSub.textContent = "This commander has Partner — search for another Partner creature to pair with it. Color identities combine for legality and mana-base checks.";
+      partnerSearch.value = '';
+    } else {
+      partnerPanel.style.display = 'none';
+      partnerSearch.value = '';
+    }
+  }
+
+  let partnerSearchAbort = null;
+  const runPartnerSearch = debounce(async (query) => {
+    if (!query || query.trim().length < 2) {
+      partnerResults.classList.remove('show');
+      partnerResults.innerHTML = '';
+      return;
+    }
+    if (partnerSearchAbort) partnerSearchAbort.abort();
+    partnerSearchAbort = new AbortController();
+    try {
+      // A commander with a fixed "Partner with X" just needs a normal
+      // name search (we already know the required exact card); a plain
+      // "Partner" commander is scoped to other plain-Partner creatures only.
+      const fixedName = selectedCommander ? cardPartnerWithName(selectedCommander) : null;
+      const scoped = fixedName
+        ? `is:commander "${query.trim()}"`
+        : `is:commander o:"Partner" -o:"Partner with" ${query.trim()}`;
+      const q = encodeURIComponent(scoped);
+      const res = await fetch(`https://api.scryfall.com/cards/search?q=${q}&order=edhrec&unique=cards`, { signal: partnerSearchAbort.signal });
+      if (res.status === 404) {
+        partnerResults.innerHTML = '<div class="autocomplete-empty">No matching Partner creatures.</div>';
+        partnerResults.classList.add('show');
+        return;
+      }
+      if (!res.ok) throw new Error('search failed');
+      const data = await res.json();
+      let cards = (data.data || []).slice(0, 8);
+      if (selectedCommander) cards = cards.filter(c => c.id !== selectedCommander.id);
+      partnerResults.innerHTML = '';
+      if (!cards.length) {
+        partnerResults.innerHTML = '<div class="autocomplete-empty">No matching Partner creatures.</div>';
+      } else {
+        cards.forEach(card => {
+          const item = document.createElement('div');
+          item.className = 'autocomplete-item';
+          const nameSpan = document.createElement('span');
+          nameSpan.textContent = card.name;
+          const typeSpan = document.createElement('span');
+          typeSpan.className = 'ac-type';
+          typeSpan.textContent = (card.set || '').toUpperCase();
+          item.appendChild(nameSpan);
+          item.appendChild(typeSpan);
+          item.addEventListener('click', () => selectPartner(card));
+          partnerResults.appendChild(item);
+        });
+      }
+      partnerResults.classList.add('show');
+    } catch (e) {
+      if (e.name === 'AbortError') return;
+      partnerResults.innerHTML = '<div class="autocomplete-empty">Search failed — check your connection.</div>';
+      partnerResults.classList.add('show');
+    }
+  }, 320);
+
+  function selectPartner(card) {
+    selectedPartner = card;
+    partnerSearch.value = '';
+    partnerResults.classList.remove('show');
+    partnerResults.innerHTML = '';
+    partnerSelName.textContent = card.name;
+    partnerSelType.textContent = cardTypeLine(card) || '';
+    attachHoverPreview(partnerSelName, cardImageUrl(card));
+    const thumb = cardImageUrl(card);
+    if (thumb) {
+      partnerSelImage.src = thumb;
+      partnerSelImage.alt = card.name;
+      partnerSelImage.classList.add('show');
+    } else {
+      partnerSelImage.classList.remove('show');
+      partnerSelImage.removeAttribute('src');
+    }
+    partnerSelected.classList.add('show');
+  }
+
+  partnerSearch.addEventListener('input', () => runPartnerSearch(partnerSearch.value));
+  partnerSearch.addEventListener('focus', () => { if (partnerResults.innerHTML) partnerResults.classList.add('show'); });
+  clearPartnerBtn.addEventListener('click', () => {
+    selectedPartner = null;
+    partnerSelected.classList.remove('show');
+  });
 
   // =====================================================================
   //  Trending commanders strip — shown right under the title, gives a
@@ -4503,7 +4820,9 @@
     }
     const idx = preconSelect.style.display !== 'none' ? parseInt(preconSelect.value, 10) : 0;
     const match = preconMatches[idx] || preconMatches[0];
-    if (listA.value.trim() && !confirm(`Replace the Original list with the "${match.deckName}" precon decklist?`)) return;
+    const target = currentMode === 'build' ? listB : listA;
+    const targetLabel = currentMode === 'build' ? 'decklist' : 'Original list';
+    if (target.value.trim() && !confirm(`Replace the ${targetLabel} with the "${match.deckName}" precon decklist?`)) return;
 
     loadPreconBtn.disabled = true;
     preconStatus.textContent = 'Loading decklist…';
@@ -4516,9 +4835,9 @@
       const lines = [];
       (deck.commander || []).forEach(c => lines.push(`${c.count || c.quantity || 1} ${c.name}`));
       (deck.mainBoard || []).forEach(c => lines.push(`${c.count || c.quantity || 1} ${c.name}`));
-      listA.value = lines.join('\n');
+      target.value = lines.join('\n');
       updateCounts();
-      preconStatus.innerHTML = `Loaded "<b>${escapeHtml(match.deckName)}</b>" (${lines.length} cards) into Original.`;
+      preconStatus.innerHTML = `Loaded "<b>${escapeHtml(match.deckName)}</b>" (${lines.length} cards) into your ${targetLabel}.`;
     } catch (e) {
       preconStatus.textContent = `Couldn't load that decklist (${e.message}).`;
       preconStatus.className = 'lookup-status err';
