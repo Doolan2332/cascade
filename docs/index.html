@@ -4838,14 +4838,84 @@
   //  available through the search API.
   // =====================================================================
 
+  // Recursively collects EDHREC "card view" entries — objects with a name
+  // plus either a deck count or a page url — from a JSON blob whose exact
+  // shape isn't documented. Order of first appearance is preserved, which
+  // matches the page's own ranking order.
+  function findEdhrecCardViews(obj, out, seen) {
+    out = out || [];
+    seen = seen || new Set();
+    if (!obj || typeof obj !== 'object') return out;
+    if (seen.has(obj)) return out;
+    seen.add(obj);
+    if (Array.isArray(obj)) {
+      obj.forEach(item => findEdhrecCardViews(item, out, seen));
+      return out;
+    }
+    const hasName = typeof obj.name === 'string' && obj.name.length > 0;
+    if (hasName && (typeof obj.num_decks === 'number' || typeof obj.url === 'string' || typeof obj.sanitized === 'string')) {
+      out.push(obj);
+    }
+    for (const key in obj) {
+      let val;
+      try { val = obj[key]; } catch (e) { continue; }
+      if (val && typeof val === 'object') findEdhrecCardViews(val, out, seen);
+    }
+    return out;
+  }
+
+  // EDHREC's own commander-popularity pages, most current first. "month"
+  // reflects the current meta (what the request asked for); the others are
+  // fallbacks if that particular slice isn't available.
+  async function fetchEdhrecTrendingCommanderNames() {
+    const urls = [
+      'https://json.edhrec.com/pages/commanders/month.json',
+      'https://json.edhrec.com/pages/commanders/week.json',
+      'https://json.edhrec.com/pages/commanders.json',
+    ];
+    for (const url of urls) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) continue;
+        const json = await res.json();
+        const views = findEdhrecCardViews(json);
+        const seenNames = new Set();
+        const names = [];
+        views.forEach(v => {
+          const n = (v.name || '').trim();
+          const key = n.toLowerCase();
+          if (n && !seenNames.has(key)) { seenNames.add(key); names.push(n); }
+        });
+        if (names.length >= 5) return names;
+      } catch (e) { /* try the next url */ }
+    }
+    return null;
+  }
+
   async function loadTrendingCommanders() {
     if (!trendingRow) return;
     try {
-      const q = encodeURIComponent('is:commander -is:digital');
-      const res = await fetch(`https://api.scryfall.com/cards/search?q=${q}&order=edhrec&unique=cards`);
-      if (!res.ok) throw new Error('search failed');
-      const data = await res.json();
-      const cards = (data.data || []).slice(0, 10);
+      let cards = null;
+
+      // Primary source: EDHREC's own live popularity data, so this reflects
+      // the current meta (e.g. a recently-popular commander like Y'shtola
+      // shows up) rather than a slower-moving lifetime rank.
+      const names = await fetchEdhrecTrendingCommanderNames();
+      if (names && names.length) {
+        const { found } = await fetchCollection(names.slice(0, 16));
+        cards = names.map(n => found.get(n.toLowerCase())).filter(Boolean).slice(0, 10);
+      }
+
+      // Fallback: Scryfall's own edhrec_rank sort, only if EDHREC's live
+      // pages couldn't be reached (network issue, schema change, etc).
+      if (!cards || cards.length < 5) {
+        const q = encodeURIComponent('is:commander -is:digital');
+        const res = await fetch(`https://api.scryfall.com/cards/search?q=${q}&order=edhrec&unique=cards`);
+        if (!res.ok) throw new Error('search failed');
+        const data = await res.json();
+        cards = (data.data || []).slice(0, 10);
+      }
+
       trendingRow.innerHTML = '';
       if (!cards.length) {
         trendingRow.innerHTML = '<div class="trending-loading">No trending commanders found.</div>';
