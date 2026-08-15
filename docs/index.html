@@ -171,6 +171,18 @@
     padding: 2px 4px;
   }
   .key-card-chip button:hover { color: var(--red); }
+  .key-card-chip-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--gold-bright);
+    background: rgba(201, 162, 75, 0.15);
+    border: 1px solid var(--gold);
+    border-radius: 10px;
+    padding: 1px 7px;
+    cursor: help;
+  }
   .key-cards-text {
     width: 100%;
     box-sizing: border-box;
@@ -1478,6 +1490,23 @@
   }
   .row.cut-row .qty { color: var(--red); }
   .row.added-row .qty { color: var(--green); }
+  .row.key-card-row {
+    background: rgba(201, 162, 75, 0.08);
+    border-left: 2px solid var(--gold);
+    padding-left: 16px;
+  }
+  .key-card-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--gold-bright);
+    background: rgba(201, 162, 75, 0.15);
+    border: 1px solid var(--gold);
+    border-radius: 20px;
+    padding: 2px 8px;
+    flex-shrink: 0;
+  }
 
   .cname {
     flex: 1 1 140px;
@@ -1888,7 +1917,7 @@
     </div>
 
     <div class="find-results" id="findResults">
-      <div class="cc-section-label">Commanders Ranked by Synergy — heuristic, based on shared themes &amp; card types, not official EDHREC data</div>
+      <div class="cc-section-label">Commanders Ranked by Relevance — from each card's own EDHREC "Top Commanders" list</div>
       <div class="find-results-list" id="findResultsList"></div>
     </div>
 
@@ -1900,6 +1929,21 @@
           <div class="sel-name" id="findChosenName"></div>
           <div class="sel-type" id="findChosenType"></div>
         </div>
+      </div>
+      <div class="lookup-row">
+        <select id="findBracketSelect">
+          <option value="">Bracket: Any</option>
+          <option value="1">Bracket 1 — Exhibition</option>
+          <option value="2">Bracket 2 — Core</option>
+          <option value="3">Bracket 3 — Upgraded</option>
+          <option value="4">Bracket 4 — Optimized</option>
+          <option value="5">Bracket 5 — cEDH</option>
+        </select>
+        <select id="findBudgetSelect">
+          <option value="">Budget: Any</option>
+          <option value="budget">Budget</option>
+          <option value="expensive">Expensive</option>
+        </select>
       </div>
       <div class="lookup-row">
         <button class="btn-small" id="generateDeckBtn">Generate Deck from EDHREC</button>
@@ -2201,6 +2245,8 @@
   const findChosenImage = document.getElementById('findChosenImage');
   const findChosenName = document.getElementById('findChosenName');
   const findChosenType = document.getElementById('findChosenType');
+  const findBracketSelect = document.getElementById('findBracketSelect');
+  const findBudgetSelect = document.getElementById('findBudgetSelect');
   const generateDeckBtn = document.getElementById('generateDeckBtn');
   const generateDeckStatus = document.getElementById('generateDeckStatus');
   const howToModal = document.getElementById('howToModal');
@@ -2218,6 +2264,7 @@
   // =====================================================================
 
   let currentMode = null; // 'build' | 'upgrade' | null (still on the landing screen)
+  let highlightedCardNames = new Set(); // lowercase names to pin to the top of Added & highlight (from Find a Commander)
 
   function enterMode(mode) {
     currentMode = mode;
@@ -2235,11 +2282,12 @@
     }
   }
 
-  modeBuildBtn.addEventListener('click', () => enterMode('build'));
-  modeUpgradeBtn.addEventListener('click', () => enterMode('upgrade'));
+  modeBuildBtn.addEventListener('click', () => { highlightedCardNames = new Set(); enterMode('build'); });
+  modeUpgradeBtn.addEventListener('click', () => { highlightedCardNames = new Set(); enterMode('upgrade'); });
   modeFindBtn.addEventListener('click', () => enterMode('find'));
   changeModeBtn.addEventListener('click', () => {
     currentMode = null;
+    highlightedCardNames = new Set();
     modeSelect.style.display = 'block';
     appBody.style.display = 'none';
     document.body.classList.remove('mode-build', 'mode-upgrade', 'mode-find');
@@ -2356,6 +2404,7 @@
     manaCurveCharts.style.display = 'none';
     manaBasePanel.style.display = 'none';
     budgetPanel.style.display = 'none';
+    highlightedCardNames = new Set();
     statusEl.textContent = '';
   });
 
@@ -3119,11 +3168,47 @@
   //  already present in the pasted list.
   // =====================================================================
 
+  // Cards like "A deck can have any number of cards named Hare Apparent"
+  // (no cap) or "...up to twenty-five cards named Templar Knight" (a
+  // stated cap). Shared by the legality check and the deck-generation
+  // copy-count planner below, so both agree on what counts and what the
+  // cap is.
+  const NUMBER_WORDS = {
+    zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
+    eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19,
+    twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90,
+  };
+
+  function parseNumberWord(str) {
+    if (!str) return null;
+    const clean = str.toLowerCase().trim();
+    if (/^\d+$/.test(clean)) return parseInt(clean, 10);
+    const parts = clean.split(/[\s-]+/).filter(Boolean);
+    let total = 0;
+    parts.forEach(p => { if (NUMBER_WORDS[p] != null) total += NUMBER_WORDS[p]; });
+    return total || null;
+  }
+
+  const ANY_NUMBER_RE = /a deck can have (?:any number of|up to\s+([a-z0-9-]+))\s+(?:cop(?:y|ies)|cards? named)/i;
+
+  function isAnyNumberCard(card) {
+    if (!card) return false;
+    return ANY_NUMBER_RE.test(cardOracleText(card));
+  }
+
+  // Returns the stated cap (e.g. 25 for "up to twenty-five"), or null for
+  // a true "any number" card with no cap.
+  function anyNumberCardCap(card) {
+    const m = cardOracleText(card).match(ANY_NUMBER_RE);
+    if (!m) return null;
+    if (m[1]) return parseNumberWord(m[1]) || 99;
+    return null;
+  }
+
   function isSingletonExempt(card) {
     if (!card) return false;
     if (isBasicLand(card)) return true;
-    const text = cardOracleText(card);
-    return /a deck can have (?:any number|up to [a-z0-9]+) (?:cop(?:y|ies)|cards named)/i.test(text);
+    return isAnyNumberCard(card);
   }
 
   function checkListLegality(map, found, colorIdentity) {
@@ -3548,9 +3633,9 @@
     return [];
   }
 
-  function makeRow(qty, displayName, card, kind) {
+  function makeRow(qty, displayName, card, kind, highlighted) {
     const row = document.createElement('div');
-    row.className = `row ${kind}-row`;
+    row.className = `row ${kind}-row` + (highlighted ? ' key-card-row' : '');
 
     const qtyEl = document.createElement('div');
     qtyEl.className = 'qty';
@@ -3562,6 +3647,13 @@
 
     row.appendChild(qtyEl);
     row.appendChild(nameEl);
+
+    if (highlighted) {
+      const badge = document.createElement('span');
+      badge.className = 'key-card-badge';
+      badge.textContent = 'Key Card';
+      row.appendChild(badge);
+    }
 
     if (card) {
       const meta = document.createElement('div');
@@ -3689,7 +3781,12 @@
     }
 
     cuts.sort((x, y) => y.qty - x.qty || x.name.localeCompare(y.name));
-    adds.sort((x, y) => y.qty - x.qty || x.name.localeCompare(y.name));
+    adds.sort((x, y) => {
+      const xHi = highlightedCardNames.has(x.key) ? 1 : 0;
+      const yHi = highlightedCardNames.has(y.key) ? 1 : 0;
+      if (xHi !== yHi) return yHi - xHi;
+      return y.qty - x.qty || x.name.localeCompare(y.name);
+    });
     latestAdds = adds.map(a => ({ ...a, card: found.get(a.key) || null }));
     renderBudgetSwaps(adds, found);
 
@@ -3711,7 +3808,7 @@
       p.textContent = 'Nothing added.';
       addedList.appendChild(p);
     } else {
-      adds.forEach(c => addedList.appendChild(makeRow(c.qty, c.name, found.get(c.key), 'added')));
+      adds.forEach(c => addedList.appendChild(makeRow(c.qty, c.name, found.get(c.key), 'added', highlightedCardNames.has(c.key))));
     }
 
     const cutQtyTotal = cuts.reduce((s, c) => s + c.qty, 0);
@@ -5240,13 +5337,18 @@
 
   // =====================================================================
   //  Find a Commander — given a handful of key cards, ranks commanders by
-  //  a heuristic synergy score (shared creature types, card types, and
-  //  mechanical themes pulled from oracle text). This is NOT official
-  //  EDHREC synergy data — there's no public API for that — it's a
-  //  transparent, explainable stand-in: candidates are pulled from
-  //  Scryfall (is:commander, color identity a superset of the key cards',
-  //  ordered by EDHREC popularity as a baseline), then re-ranked by how
-  //  many theme tags they share with the key cards.
+  //  REAL EDHREC data: for each key card, we fetch that card's own EDHREC
+  //  page and read its "Top Commanders" list (EDHREC already computes this
+  //  per-card synergy ranking — we don't recompute it). Any commander that
+  //  shows up on one or more of those lists is a candidate; candidates are
+  //  scored by how many key cards recommend them and how strongly (EDHREC's
+  //  synergy % where exposed, otherwise their rank within that card's own
+  //  list). Every candidate is then re-verified as an actually-legal
+  //  commander for the full set of key cards — commander-eligible, and its
+  //  color identity a superset of every key card's colors — before it's
+  //  ever shown. A light theme/type-overlap heuristic only breaks ties. If
+  //  EDHREC has no data for any key card, this falls back to popular
+  //  legal commanders in the right colors so the search isn't a dead end.
   // =====================================================================
 
   let keyCardObjects = []; // resolved Scryfall card objects
@@ -5304,37 +5406,190 @@
     return weights;
   }
 
-  function sharedTagLabels(candidateTags, keyWeights, max) {
-    const shared = [];
-    candidateTags.forEach(tag => { if (keyWeights.has(tag)) shared.push(tag); });
-    shared.sort((a, b) => keyWeights.get(b) - keyWeights.get(a));
-    return shared.slice(0, max || 4).map(t => t.replace(/^(Type|Card|Theme):/, ''));
+  // Pulls a numeric synergy fraction out of an EDHREC "cardview" entry —
+  // either a direct `synergy` field, or parsed from a "+15%"-style label.
+  function edhrecCardViewSynergy(view) {
+    if (typeof view.synergy === 'number') return view.synergy;
+    if (typeof view.label === 'string') {
+      const m = view.label.match(/([+-]?\d+)\s*%/);
+      if (m) return parseInt(m[1], 10) / 100;
+    }
+    return null;
   }
 
-  async function findCommandersForKeyCards(cards) {
-    const identitySet = new Set();
-    cards.forEach(c => (c.color_identity || []).forEach(col => identitySet.add(col)));
-    const identity = Array.from(identitySet);
-    const idFilter = identity.length ? `id>=${identity.join('').toLowerCase()}` : '';
-    const q = encodeURIComponent(`is:commander ${idFilter}`.trim());
-    const res = await fetch(`https://api.scryfall.com/cards/search?q=${q}&order=edhrec&unique=cards`);
-    if (!res.ok) throw new Error('search failed');
-    const data = await res.json();
-    const pool = (data.data || []).slice(0, 100);
+  // Collects cardview entries from an EDHREC card page's JSON, preferring
+  // whichever cardlist(s) are actually labeled as commanders (the page
+  // shows several sections — "Top Commanders", "High Synergy Cards",
+  // "Top Cards" — and we only want the commanders one). Falls back to
+  // every cardview on the page if no list is clearly labeled, since a
+  // downstream commander-eligibility check filters out the rest anyway.
+  function findEdhrecCommanderCardviews(json) {
+    const cardlists = [];
+    (function walk(obj, seen) {
+      if (!obj || typeof obj !== 'object') return;
+      if (seen.has(obj)) return;
+      seen.add(obj);
+      if (Array.isArray(obj)) { obj.forEach(o => walk(o, seen)); return; }
+      if (Array.isArray(obj.cardviews) && (typeof obj.header === 'string' || typeof obj.tag === 'string')) {
+        cardlists.push(obj);
+      }
+      for (const key in obj) {
+        let val;
+        try { val = obj[key]; } catch (e) { continue; }
+        if (val && typeof val === 'object') walk(val, seen);
+      }
+    })(json, new Set());
 
-    const keyWeights = buildTagWeights(cards);
-    const keyNames = new Set(cards.map(c => c.name.toLowerCase()));
+    const commanderLists = cardlists.filter(cl => {
+      const label = ((cl.header || '') + ' ' + (cl.tag || '')).toLowerCase();
+      return label.includes('commander');
+    });
 
-    return pool
-      .filter(c => !keyNames.has(c.name.toLowerCase()))
-      .map((c, idx) => {
-        const tags = cardThemeTags(c);
-        let score = 0;
-        tags.forEach(tag => { if (keyWeights.has(tag)) score += keyWeights.get(tag); });
-        return { card: c, score, rankIdx: idx, tags };
-      })
-      .sort((a, b) => b.score - a.score || a.rankIdx - b.rankIdx)
-      .slice(0, 10);
+    const views = [];
+    (commanderLists.length ? commanderLists : cardlists).forEach(cl => cl.cardviews.forEach(v => views.push(v)));
+    return views;
+  }
+
+  // Fetches ONE key card's own EDHREC page and returns its "Top Commanders"
+  // list in EDHREC's own ranked order: [{ name, synergy, rank }, ...].
+  async function fetchTopCommandersForCard(card) {
+    const slug = slugify(card.name);
+    try {
+      const res = await fetch(`https://json.edhrec.com/pages/cards/${slug}.json`);
+      if (!res.ok) return null;
+      const json = await res.json();
+      if (!json || !json.container) return null;
+      const views = findEdhrecCommanderCardviews(json);
+      const seen = new Set();
+      const list = [];
+      views.forEach(v => {
+        const n = (v.name || '').trim();
+        const key = n.toLowerCase();
+        if (!n || seen.has(key)) return;
+        seen.add(key);
+        list.push({ name: n, synergy: edhrecCardViewSynergy(v), rank: list.length });
+      });
+      return list;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function isCommanderEligible(card) {
+    const type = card.type_line || (card.card_faces && card.card_faces[0] && card.card_faces[0].type_line) || '';
+    if (/\bLegendary\b/i.test(type) && /\bCreature\b/i.test(type)) return true;
+    return /can be your commander/i.test(cardOracleText(card));
+  }
+
+  // cards: key card objects. onProgress(done, total, name) fires once per
+  // key card as its EDHREC "top commanders" page is fetched — this scales
+  // with the number of key cards you gave it, not with how many candidate
+  // commanders exist, so it's fast even with a big commander pool.
+  async function findCommandersForKeyCards(cards, onProgress) {
+    const identity = Array.from(new Set(cards.flatMap(c => c.color_identity || [])));
+    const keyNamesLower = new Set(cards.map(c => c.name.toLowerCase()));
+    const tagWeights = buildTagWeights(cards);
+
+    // 1. Pull each key card's own ranked "Top Commanders" list from EDHREC.
+    //    Each fetch is independently guarded — one card's page being
+    //    missing, mis-slugged, or briefly unreachable never stops the
+    //    others or aborts the whole search.
+    const perCardLists = [];
+    for (let i = 0; i < cards.length; i++) {
+      if (onProgress) onProgress(i + 1, cards.length, cards[i].name);
+      let list = null;
+      try {
+        list = await fetchTopCommandersForCard(cards[i]);
+      } catch (e) {
+        list = null;
+      }
+      perCardLists.push({ card: cards[i], list: list || [] });
+      await new Promise(r => setTimeout(r, 60));
+    }
+
+    // 2. Aggregate: any commander name that shows up on one or more of
+    //    those lists accumulates a relevance score across every key card
+    //    that recommends it — explicit synergy % when EDHREC exposes one,
+    //    otherwise a falloff based on its rank within that card's list.
+    const agg = new Map(); // lowercase name -> { name, score, matchedCards }
+    perCardLists.forEach(({ card, list }) => {
+      list.forEach(entry => {
+        const key = entry.name.toLowerCase();
+        if (keyNamesLower.has(key)) return;
+        if (!agg.has(key)) agg.set(key, { name: entry.name, score: 0, matchedCards: [] });
+        const bucket = agg.get(key);
+        const rankWeight = Math.max(0, 1 - entry.rank / 40) * 0.3;
+        bucket.score += entry.synergy != null ? Math.max(entry.synergy, 0.02) : rankWeight;
+        bucket.matchedCards.push({ name: card.name, synergy: entry.synergy, rank: entry.rank });
+      });
+    });
+    const foundAnyData = perCardLists.some(p => p.list.length > 0);
+
+    // 3. Resolve the top-scoring aggregated names to real Scryfall cards —
+    //    capped to the best 40 by preliminary score before resolving, so a
+    //    single card with a long or messy EDHREC list can't turn into a
+    //    slow chain of one-by-one fuzzy lookups. This step also doubles as
+    //    the legality gate: anything not actually commander-eligible, or
+    //    whose color identity doesn't cover every key card's colors, is
+    //    dropped right here. If resolution itself fails, we fall through
+    //    to the popularity-based fallback below instead of erroring out.
+    let results = [];
+    if (agg.size) {
+      const topNames = Array.from(agg.values())
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 40)
+        .map(v => v.name);
+      try {
+        const { found } = await fetchCollection(topNames);
+        found.forEach((candidate, key) => {
+          if (keyNamesLower.has(key)) return;
+          if (!isCommanderEligible(candidate)) return;
+          if (!identity.every(col => (candidate.color_identity || []).includes(col))) return;
+          const bucket = agg.get(key);
+          if (!bucket) return;
+          const tags = cardThemeTags(candidate);
+          let tagScore = 0;
+          tags.forEach(tag => { if (tagWeights.has(tag)) tagScore += tagWeights.get(tag); });
+          results.push({
+            card: candidate,
+            score: bucket.score * 100 + tagScore * 2,
+            matchedCards: bucket.matchedCards,
+            matchedCount: bucket.matchedCards.length,
+            hasEdhrecData: true,
+            tags,
+          });
+        });
+      } catch (e) {
+        results = [];
+      }
+    }
+
+    if (!results.length) {
+      // EDHREC didn't have usable data for any key card (or nothing legal
+      // came out the other end) — fall back to popular legal commanders in
+      // these colors so the search isn't a dead end. Only if THIS also
+      // fails do we treat it as a genuine connectivity problem.
+      try {
+        const idFilter = identity.length ? `id>=${identity.join('').toLowerCase()}` : '';
+        const q = encodeURIComponent(`is:commander ${idFilter}`.trim());
+        const res = await fetch(`https://api.scryfall.com/cards/search?q=${q}&order=edhrec&unique=cards`);
+        if (res.ok) {
+          const data = await res.json();
+          const pool = (data.data || [])
+            .filter(c => !keyNamesLower.has(c.name.toLowerCase()))
+            .filter(c => identity.every(col => (c.color_identity || []).includes(col)))
+            .slice(0, 10);
+          results = pool.map(card => ({
+            card, score: 0, matchedCards: [], matchedCount: 0, hasEdhrecData: foundAnyData, tags: cardThemeTags(card),
+          }));
+        }
+      } catch (e) {
+        throw e;
+      }
+    }
+
+    results.sort((a, b) => b.score - a.score || b.matchedCount - a.matchedCount || a.card.name.localeCompare(b.card.name));
+    return results.slice(0, 10);
   }
 
   function parseKeyCardNames(text) {
@@ -5352,6 +5607,15 @@
       chip.className = 'key-card-chip';
       const label = document.createElement('span');
       label.textContent = card.name;
+      chip.appendChild(label);
+      if (isAnyNumberCard(card)) {
+        const cap = anyNumberCardCap(card);
+        const badge = document.createElement('span');
+        badge.className = 'key-card-chip-badge';
+        badge.textContent = cap != null ? `up to ${cap}` : 'any #';
+        badge.title = 'This card allows multiple copies in a deck — a playset count will be calculated when generating a deck.';
+        chip.appendChild(badge);
+      }
       const removeBtn = document.createElement('button');
       removeBtn.type = 'button';
       removeBtn.textContent = '×';
@@ -5360,7 +5624,6 @@
         keyCardObjects.splice(idx, 1);
         renderKeyCardChips();
       });
-      chip.appendChild(label);
       chip.appendChild(removeBtn);
       keyCardsChips.appendChild(chip);
     });
@@ -5373,15 +5636,22 @@
     }
   });
 
-  function renderFindResults(scored) {
+  function formatSynergyMatch(m) {
+    if (m.synergy != null) {
+      const pct = Math.round(m.synergy * 100);
+      return pct !== 0 ? `${m.name} (${pct > 0 ? '+' : ''}${pct}%)` : m.name;
+    }
+    return m.name;
+  }
+
+  function renderFindResults(scored, keyCount) {
     findResultsList.innerHTML = '';
     if (!scored.length) {
-      findResultsList.innerHTML = '<div class="cc-legend-empty">No commanders found for these cards\' colors.</div>';
+      findResultsList.innerHTML = '<div class="cc-legend-empty">No legal commanders found for these cards\' colors.</div>';
       findResults.classList.add('show');
       return;
     }
     const maxScore = Math.max(1, ...scored.map(s => s.score));
-    const keyWeights = buildTagWeights(keyCardObjects);
 
     scored.forEach(s => {
       const item = document.createElement('div');
@@ -5405,14 +5675,20 @@
       const meta = document.createElement('div');
       meta.className = 'find-result-meta';
       const idText = (s.card.color_identity && s.card.color_identity.length) ? s.card.color_identity.join('') : 'C';
-      const shared = sharedTagLabels(s.tags, keyWeights, 4);
-      meta.textContent = shared.length ? `${idText} · Shares: ${shared.join(', ')}` : `${idText} · ${cardTypeLine(s.card) || ''}`;
+      if (s.matchedCards.length) {
+        const top = s.matchedCards.slice().sort((a, b) => (b.synergy || 0) - (a.synergy || 0)).slice(0, 3).map(formatSynergyMatch);
+        meta.textContent = `${idText} · Top commander for: ${top.join(', ')}`;
+      } else if (!s.hasEdhrecData) {
+        meta.textContent = `${idText} · No EDHREC data for these cards — showing popular legal commanders instead`;
+      } else {
+        meta.textContent = `${idText} · Not a top commander for these specific cards — ranked by theme overlap`;
+      }
       info.appendChild(meta);
       item.appendChild(info);
 
       const scoreBox = document.createElement('div');
       scoreBox.className = 'find-result-score';
-      scoreBox.appendChild(document.createTextNode(s.score > 0 ? `${s.score} pt${s.score === 1 ? '' : 's'}` : 'Popular'));
+      scoreBox.appendChild(document.createTextNode(`${s.matchedCount}/${keyCount} cards`));
       const track = document.createElement('div');
       track.className = 'bar-track';
       const fill = document.createElement('div');
@@ -5477,9 +5753,10 @@
         return;
       }
 
-      findStatus.textContent = 'Searching for commanders…';
-      const scored = await findCommandersForKeyCards(keyCardObjects);
-      renderFindResults(scored);
+      const scored = await findCommandersForKeyCards(keyCardObjects, (done, total, name) => {
+        findStatus.textContent = `Checking EDHREC's top commanders for ${name}… (${done}/${total})`;
+      });
+      renderFindResults(scored, keyCardObjects.length);
       findStatus.textContent = '';
     } catch (e) {
       findStatus.textContent = "Couldn't complete the search — check your connection and try again.";
@@ -5488,6 +5765,35 @@
     findCommandersBtn.disabled = false;
   });
 
+  // Cards like Hare Apparent ("any number") or Templar Knight ("up to
+  // twenty-five") can't be commanders themselves, but when one is a key
+  // card the whole point is usually to run a critical mass of it as the
+  // deck's payoff. There's no single "correct" count — it depends on the
+  // rest of the build — so this estimates a reasonable one from ordinary
+  // deckbuilding math: start from a standard ~37-land, ~62-nonland split,
+  // reserve a normal-sized support shell (ramp/removal/draw/interaction)
+  // and whatever other key cards take up, and split what's left evenly
+  // across however many any-number cards were given — clamped to a
+  // sensible 15–40 range, and to the card's own stated cap if it has one.
+  function computeAnyNumberCopyPlan(anynameCards, otherKeyCount) {
+    if (!anynameCards.length) return [];
+    const LANDS_TARGET = 37;
+    const SUPPORT_RESERVE = 20;
+    const nonlandSlots = 99 - LANDS_TARGET;
+    const availableForPayoffs = Math.max(
+      anynameCards.length * 15,
+      nonlandSlots - SUPPORT_RESERVE - otherKeyCount
+    );
+    const perCard = Math.floor(availableForPayoffs / anynameCards.length);
+
+    return anynameCards.map(card => {
+      const cap = anyNumberCardCap(card);
+      let copies = Math.max(15, Math.min(40, perCard));
+      if (cap != null) copies = Math.min(copies, cap);
+      return { card, copies };
+    });
+  }
+
   generateDeckBtn.addEventListener('click', async () => {
     if (!selectedCommander) return;
     generateDeckBtn.disabled = true;
@@ -5495,14 +5801,21 @@
     generateDeckStatus.className = 'lookup-status';
     try {
       const slug = slugify(selectedCommander.name);
-      const result = await fetchEdhrecAverageDeck(slug, null, null);
+      const bracket = findBracketSelect.value;
+      const budget = findBudgetSelect.value;
+      const result = await fetchEdhrecAverageDeck(slug, bracket, budget);
       const edhrecLines = result ? extractDecklistFromEdhrecJson(result.json).lines : [];
+
+      const anynameCards = keyCardObjects.filter(isAnyNumberCard);
+      const normalKeyCards = keyCardObjects.filter(c => !isAnyNumberCard(c));
+      const copyPlan = computeAnyNumberCopyPlan(anynameCards, normalKeyCards.length);
 
       const keyNamesLower = new Set(keyCardObjects.map(c => c.name.toLowerCase()));
       const finalLines = [`1 ${selectedCommander.name}`];
-      keyCardObjects.forEach(c => finalLines.push(`1 ${c.name}`));
+      normalKeyCards.forEach(c => finalLines.push(`1 ${c.name}`));
+      copyPlan.forEach(({ card, copies }) => finalLines.push(`${copies} ${card.name}`));
 
-      let runningTotal = 1 + keyCardObjects.length;
+      let runningTotal = 1 + normalKeyCards.length + copyPlan.reduce((s, p) => s + p.copies, 0);
       for (const line of edhrecLines) {
         if (runningTotal >= 100) break;
         const m = line.match(/^(\d+)\s+(.+)$/);
@@ -5516,14 +5829,22 @@
         runningTotal += use;
       }
 
+      highlightedCardNames = new Set(keyCardObjects.map(c => c.name.toLowerCase()));
+
       enterMode('build');
       compareBtn.textContent = 'Build';
       panelLabelB.textContent = 'Your Decklist';
       listB.value = finalLines.join('\n');
       updateCounts();
-      generateDeckStatus.textContent = result
+
+      let statusMsg = result
         ? `Generated a ${runningTotal}-card deck around ${selectedCommander.name}, including your ${keyCardObjects.length} key card${keyCardObjects.length === 1 ? '' : 's'}.`
         : `Couldn't reach EDHREC for this commander — started your deck with just the commander and key cards. Fill in the rest manually.`;
+      if (copyPlan.length) {
+        const planText = copyPlan.map(p => `${p.copies}× ${p.card.name}`).join(', ');
+        statusMsg += ` ${planText} — estimated count for an "any number of copies" card, leaving room for a normal support shell; adjust as you like.`;
+      }
+      generateDeckStatus.textContent = statusMsg;
       generateDeckStatus.className = result ? 'lookup-status' : 'lookup-status warn';
       compareBtn.click();
     } catch (e) {
