@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root {
     --bg: #141b17;
@@ -89,7 +90,7 @@
   }
 
   /* ---------- Mode select landing screen ---------- */
-  .mode-select { display: block; max-width: 1040px; margin: 0 auto 40px; }
+  .mode-select { display: block; max-width: 1300px; margin: 0 auto 40px; }
   .mode-select-title {
     text-align: center;
     font-family: 'Cinzel', serif;
@@ -100,10 +101,10 @@
   }
   .mode-cards {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     gap: 22px;
   }
-  @media (max-width: 900px) {
+  @media (max-width: 1100px) {
     .mode-cards { grid-template-columns: 1fr 1fr; }
   }
   @media (max-width: 640px) {
@@ -138,9 +139,11 @@
   .app-body { display: none; }
   .workflow-section { display: none; }
   .find-section { display: none; }
+  .collection-section { display: none; }
   body.mode-build .workflow-section,
   body.mode-upgrade .workflow-section { display: block; }
   body.mode-find .find-section { display: block; }
+  body.mode-collection .collection-section { display: block; }
   .change-mode-btn {
     display: block;
     margin: 0 0 26px;
@@ -245,6 +248,113 @@
 
   .find-chosen { display: none; margin-top: 26px; }
   .find-chosen.show { display: block; }
+
+  /* ---------- Collection ---------- */
+  .file-label {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  .collection-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 22px 0 14px;
+  }
+  .collection-count { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--muted); }
+  .collection-toolbar-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .collection-list {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .collection-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .collection-row:last-child { border-bottom: none; }
+  .collection-row:hover { background: rgba(255,255,255,0.02); }
+  .collection-qty-input {
+    width: 52px;
+    background: var(--bg-alt);
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    color: var(--gold-bright);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 5px 6px;
+    text-align: center;
+    outline: none;
+    flex-shrink: 0;
+  }
+  .collection-qty-input:focus { border-color: var(--gold); }
+  .collection-row .cname { flex: 1; min-width: 0; }
+  .collection-row .remove-x {
+    background: none;
+    border: none;
+    color: var(--muted-dim);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 2px 6px;
+    flex-shrink: 0;
+  }
+  .collection-row .remove-x:hover { color: var(--red); }
+
+  /* Shared type-group header, used by grouped decklists and the collection list */
+  .type-group-header {
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold-bright);
+    background: var(--bg-alt);
+    padding: 7px 18px;
+    border-bottom: 1px solid var(--border-soft);
+    border-top: 1px solid var(--border-soft);
+  }
+  .type-group-header:first-child { border-top: none; }
+
+  .owned-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--blue);
+    background: var(--blue-bg);
+    border: 1px solid var(--blue);
+    border-radius: 20px;
+    padding: 2px 8px;
+    flex-shrink: 0;
+  }
+
+  .cd-collection {
+    margin: 16px 0;
+    padding: 14px 0;
+    border-top: 1px solid var(--border-soft);
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .cd-collection-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+  .cd-collection-status { font-size: 13px; color: var(--muted); flex: 1; min-width: 160px; }
+  .cd-collection-status.owned { color: var(--blue); }
+  .cd-collection-qty {
+    width: 60px;
+    background: var(--bg-alt);
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    color: var(--parchment);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 6px 8px;
+    text-align: center;
+    outline: none;
+  }
+  .cd-collection-qty:focus { border-color: var(--gold); }
 
   /* Build mode: hide the "before" side of things that only make sense as
      a diff (Original list, the empty Cut column, and the Original half of
@@ -1011,6 +1121,12 @@
   .history-item .hi-commander { font-family: 'Cinzel', serif; font-size: 13px; color: var(--gold-bright); margin-bottom: 3px; }
   .history-item .hi-summary { color: var(--parchment); }
   .history-item .hi-summary b { color: var(--gold-bright); }
+  .history-item .hi-art-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--gold-bright);
+    margin-top: 5px;
+  }
   .history-item .hi-actions { display: flex; gap: 8px; flex-shrink: 0; }
   .history-empty { text-align: center; color: var(--muted-dim); font-style: italic; padding: 30px 0; }
 
@@ -1670,6 +1786,11 @@
         <div class="mode-card-title">Find a Commander</div>
         <div class="mode-card-desc">Give it a few key cards and get commanders ranked by how well they pair with them.</div>
       </button>
+      <button type="button" class="mode-card" id="modeCollectionBtn">
+        <div class="mode-card-icon">📚</div>
+        <div class="mode-card-title">Collection</div>
+        <div class="mode-card-desc">Catalog the cards you own, import or export your list, and see what you already have while building.</div>
+      </button>
     </div>
   </div>
 
@@ -1961,6 +2082,40 @@
 
   </div>
 
+  <div class="collection-section" id="collectionSection">
+    <div class="lookup-panel">
+      <div class="lookup-title">Import Collection</div>
+      <div class="lookup-sub">Paste a plain list (one card per line, "qty Name"), or upload a spreadsheet — most exports with a Name/Quantity column will work.</div>
+      <textarea id="collectionImportText" class="key-cards-text" placeholder="2 Sol Ring&#10;1 Rhystic Study&#10;4 Arcane Signet"></textarea>
+      <div class="lookup-row">
+        <button class="btn-small" id="collectionImportTextBtn">Import Pasted List</button>
+        <label class="btn-small file-label" for="collectionFileInput">Upload Spreadsheet…</label>
+        <input type="file" id="collectionFileInput" accept=".xlsx,.xls,.csv" style="display:none;" />
+      </div>
+      <div class="lookup-status" id="collectionImportStatus"></div>
+    </div>
+
+    <div class="lookup-panel">
+      <div class="lookup-title">Add a Card</div>
+      <div class="lookup-sub">Search and add one at a time — set the quantity afterward in the list below.</div>
+      <div class="card-add-row">
+        <input type="text" id="collectionAddInput" placeholder="Search a card to add…" autocomplete="off" />
+        <div class="autocomplete-list" id="collectionAddResults"></div>
+      </div>
+    </div>
+
+    <div class="collection-toolbar">
+      <span class="collection-count" id="collectionCount">0 cards</span>
+      <div class="collection-toolbar-actions">
+        <button class="btn-small" id="collectionExportTextBtn">Export as Text</button>
+        <button class="btn-small" id="collectionExportXlsxBtn">Export as Spreadsheet</button>
+        <button class="btn-small" id="collectionClearBtn">Clear All</button>
+      </div>
+    </div>
+
+    <div class="collection-list" id="collectionList"></div>
+  </div>
+
   <footer>Card data &amp; images via <a href="https://scryfall.com" target="_blank" rel="noopener">Scryfall</a>. Not affiliated with Wizards of the Coast.</footer>
 </div>
 
@@ -2001,6 +2156,7 @@
     <div class="progress-track" id="previewProgress"><div class="progress-fill" id="previewProgressFill"></div></div>
     <div class="preview-footer">
       <div class="job-status" id="previewStatus"></div>
+      <button class="btn-small" id="previewShareBtn">Copy Preview Share Link</button>
       <button class="btn-small" id="previewDownloadBtn">Print / Save as PDF</button>
     </div>
   </div>
@@ -2235,9 +2391,11 @@
   const modeBuildBtn = document.getElementById('modeBuildBtn');
   const modeUpgradeBtn = document.getElementById('modeUpgradeBtn');
   const modeFindBtn = document.getElementById('modeFindBtn');
+  const modeCollectionBtn = document.getElementById('modeCollectionBtn');
   const appBody = document.getElementById('appBody');
   const workflowSection = document.getElementById('workflowSection');
   const findSection = document.getElementById('findSection');
+  const collectionSection = document.getElementById('collectionSection');
   const changeModeBtn = document.getElementById('changeModeBtn');
   const panelLabelB = document.getElementById('panelLabelB');
   const keyCardInput = document.getElementById('keyCardInput');
@@ -2256,6 +2414,17 @@
   const findBudgetSelect = document.getElementById('findBudgetSelect');
   const generateDeckBtn = document.getElementById('generateDeckBtn');
   const generateDeckStatus = document.getElementById('generateDeckStatus');
+  const collectionImportText = document.getElementById('collectionImportText');
+  const collectionImportTextBtn = document.getElementById('collectionImportTextBtn');
+  const collectionFileInput = document.getElementById('collectionFileInput');
+  const collectionImportStatus = document.getElementById('collectionImportStatus');
+  const collectionAddInput = document.getElementById('collectionAddInput');
+  const collectionAddResults = document.getElementById('collectionAddResults');
+  const collectionCount = document.getElementById('collectionCount');
+  const collectionExportTextBtn = document.getElementById('collectionExportTextBtn');
+  const collectionExportXlsxBtn = document.getElementById('collectionExportXlsxBtn');
+  const collectionClearBtn = document.getElementById('collectionClearBtn');
+  const collectionList = document.getElementById('collectionList');
   const howToModal = document.getElementById('howToModal');
   const howToCloseBtn = document.getElementById('howToCloseBtn');
   const historyModal = document.getElementById('historyModal');
@@ -2277,9 +2446,9 @@
     currentMode = mode;
     modeSelect.style.display = 'none';
     appBody.style.display = 'block';
-    document.body.classList.remove('mode-build', 'mode-upgrade', 'mode-find');
+    document.body.classList.remove('mode-build', 'mode-upgrade', 'mode-find', 'mode-collection');
     document.body.classList.add('mode-' + mode);
-    if (mode !== 'find') {
+    if (mode === 'build' || mode === 'upgrade') {
       compareBtn.textContent = mode === 'build' ? 'Build' : 'Compare lists';
       panelLabelB.textContent = mode === 'build' ? 'Your Decklist' : 'Updated';
       if (mode === 'build' && listA.value.trim()) {
@@ -2287,17 +2456,19 @@
         updateCounts();
       }
     }
+    if (mode === 'collection') renderCollectionList();
   }
 
   modeBuildBtn.addEventListener('click', () => { highlightedCardNames = new Set(); enterMode('build'); });
   modeUpgradeBtn.addEventListener('click', () => { highlightedCardNames = new Set(); enterMode('upgrade'); });
   modeFindBtn.addEventListener('click', () => enterMode('find'));
+  modeCollectionBtn.addEventListener('click', () => enterMode('collection'));
   changeModeBtn.addEventListener('click', () => {
     currentMode = null;
     highlightedCardNames = new Set();
     modeSelect.style.display = 'block';
     appBody.style.display = 'none';
-    document.body.classList.remove('mode-build', 'mode-upgrade', 'mode-find');
+    document.body.classList.remove('mode-build', 'mode-upgrade', 'mode-find', 'mode-collection');
   });
 
   // ---- PDF Preview modal DOM refs ----
@@ -2313,6 +2484,7 @@
   const previewProgress = document.getElementById('previewProgress');
   const previewProgressFill = document.getElementById('previewProgressFill');
   const previewDownloadBtn = document.getElementById('previewDownloadBtn');
+  const previewShareBtn = document.getElementById('previewShareBtn');
   let previewSlots = []; // the editable list of {id, name, card, faceIndex, prints, printIndex, imageUrl, setName, setCode}
   let previewIdCounter = 0;
 
@@ -2361,6 +2533,7 @@
   const loadEdhrecBtn = document.getElementById('loadEdhrecBtn');
   const edhrecStatus = document.getElementById('edhrecStatus');
   let selectedCommander = null; // Scryfall card object
+  let currentHistoryId = null; // history entry that print-preview edits (art picks, tokens, order) get saved onto
   let selectedPartner = null; // Scryfall card object, for commanders with plain "Partner"
 
   function cardHasPlainPartner(card) {
@@ -2642,6 +2815,7 @@
       cardAddResultsA.classList.remove('show');
       cardAddResultsB.classList.remove('show');
       keyCardResults.classList.remove('show');
+      collectionAddResults.classList.remove('show');
     }
   });
 
@@ -2684,6 +2858,32 @@
     }
 
     return { found, notFound };
+  }
+
+  // Batch-fetches exact printings by Scryfall id (used to restore a print
+  // preview share link or history snapshot precisely — same printing, not
+  // just same card name).
+  async function fetchCardsByIds(ids) {
+    const results = new Map(); // id -> card object
+    const chunks = [];
+    for (let i = 0; i < ids.length; i += 75) chunks.push(ids.slice(i, i + 75));
+    for (const chunk of chunks) {
+      try {
+        const res = await fetch('https://api.scryfall.com/cards/collection', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identifiers: chunk.map(id => ({ id })) })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          (data.data || []).forEach(card => results.set(card.id, card));
+        }
+      } catch (e) {
+        // network error for this chunk; those cards just won't be restored
+      }
+      await new Promise(r => setTimeout(r, 80));
+    }
+    return results;
   }
 
   function cardImageUrl(card) {
@@ -2856,6 +3056,8 @@
       metaRow.appendChild(priceSpan);
     }
     if (metaRow.children.length) cardDetailBody.appendChild(metaRow);
+
+    cardDetailBody.appendChild(buildCollectionSection(card));
 
     const tokens = document.createElement('div');
     tokens.className = 'cd-printings';
@@ -3662,6 +3864,14 @@
       row.appendChild(badge);
     }
 
+    const ownedQty = getCollectionQty(displayName);
+    if (ownedQty > 0) {
+      const ownedBadge = document.createElement('span');
+      ownedBadge.className = 'owned-badge';
+      ownedBadge.textContent = `Owned ×${ownedQty}`;
+      row.appendChild(ownedBadge);
+    }
+
     if (card) {
       const meta = document.createElement('div');
       meta.className = 'row-meta';
@@ -3738,7 +3948,7 @@
     }catch(e){alert('Unable to copy to clipboard.');}
   });
 
-  compareBtn.addEventListener('click', async () => {
+  async function runCompare() {
     const a = parseList(listA.value);
     const b = parseList(listB.value);
 
@@ -3787,8 +3997,16 @@
       return;
     }
 
-    cuts.sort((x, y) => y.qty - x.qty || x.name.localeCompare(y.name));
+    cuts.sort((x, y) => {
+      const xg = TYPE_GROUPS.indexOf(cardTypeGroup(found.get(x.key)));
+      const yg = TYPE_GROUPS.indexOf(cardTypeGroup(found.get(y.key)));
+      if (xg !== yg) return xg - yg;
+      return y.qty - x.qty || x.name.localeCompare(y.name);
+    });
     adds.sort((x, y) => {
+      const xg = TYPE_GROUPS.indexOf(cardTypeGroup(found.get(x.key)));
+      const yg = TYPE_GROUPS.indexOf(cardTypeGroup(found.get(y.key)));
+      if (xg !== yg) return xg - yg;
       const xHi = highlightedCardNames.has(x.key) ? 1 : 0;
       const yHi = highlightedCardNames.has(y.key) ? 1 : 0;
       if (xHi !== yHi) return yHi - xHi;
@@ -3797,26 +4015,8 @@
     latestAdds = adds.map(a => ({ ...a, card: found.get(a.key) || null }));
     renderBudgetSwaps(adds, found);
 
-    cutList.innerHTML = '';
-    addedList.innerHTML = '';
-
-    if (cuts.length === 0) {
-      const p = document.createElement('div');
-      p.className = 'empty-note';
-      p.textContent = 'Nothing cut.';
-      cutList.appendChild(p);
-    } else {
-      cuts.forEach(c => cutList.appendChild(makeRow(c.qty, c.name, found.get(c.key), 'cut')));
-    }
-
-    if (adds.length === 0) {
-      const p = document.createElement('div');
-      p.className = 'empty-note';
-      p.textContent = 'Nothing added.';
-      addedList.appendChild(p);
-    } else {
-      adds.forEach(c => addedList.appendChild(makeRow(c.qty, c.name, found.get(c.key), 'added', highlightedCardNames.has(c.key))));
-    }
+    renderGroupedInto(cutList, cuts, (c) => found.get(c.key), (c, card) => makeRow(c.qty, c.name, card, 'cut'), 'Nothing cut.');
+    renderGroupedInto(addedList, adds, (c) => found.get(c.key), (c, card) => makeRow(c.qty, c.name, card, 'added', highlightedCardNames.has(c.key)), 'Nothing added.');
 
     const cutQtyTotal = cuts.reduce((s, c) => s + c.qty, 0);
     const addQtyTotal = adds.reduce((s, c) => s + c.qty, 0);
@@ -3826,7 +4026,7 @@
     addedTotalVal.textContent = formatListValue(adds, found);
     cutSummary.textContent = `−${cutQtyTotal} cut`;
     addedSummary.textContent = `+${addQtyTotal} added`;
-    addHistoryEntry(listA.value, listB.value, cuts.length, adds.length, cutQtyTotal, addQtyTotal, selectedCommander ? selectedCommander.name : null);
+    currentHistoryId = addHistoryEntry(listA.value, listB.value, cuts.length, adds.length, cutQtyTotal, addQtyTotal, selectedCommander ? selectedCommander.name : null);
 
     if (notFound.size > 0) {
       unrecognizedBox.style.display = 'block';
@@ -3838,7 +4038,8 @@
     results.classList.add('show');
     statusEl.textContent = '';
     compareBtn.disabled = false;
-  });
+  }
+  compareBtn.addEventListener('click', runCompare);
 
   // =====================================================================
   //  Shared helpers
@@ -3925,19 +4126,35 @@
   }
 
   function addHistoryEntry(listAText, listBText, cutCount, addCount, cutTotal, addTotal, commanderName) {
-    if (!listAText.trim() && !listBText.trim()) return;
+    if (!listAText.trim() && !listBText.trim()) return null;
     const entries = loadHistory();
     const last = entries[0];
-    if (last && last.listA === listAText && last.listB === listBText) return; // skip exact repeats
+    if (last && last.listA === listAText && last.listB === listBText) return last.id; // exact repeat — keep updating that entry
+    const id = Date.now() + '-' + Math.random().toString(36).slice(2, 7);
     entries.unshift({
-      id: Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+      id,
       ts: Date.now(),
       listA: listAText,
       listB: listBText,
       cutCount, addCount, cutTotal, addTotal,
-      commander: commanderName || null
+      commander: commanderName || null,
+      previewSlots: null // filled in once the print preview is opened/customized
     });
     if (entries.length > HISTORY_MAX) entries.length = HISTORY_MAX;
+    saveHistory(entries);
+    return id;
+  }
+
+  // Saves the live print-preview state (exact printings, order, tokens) onto
+  // whichever history entry is "current" — called after every preview
+  // render, so every detail of a deck (not just the decklist text) ends up
+  // saved and shareable, not just what's shown at the moment Compare runs.
+  function persistPreviewSlotsToHistory() {
+    if (!currentHistoryId) return;
+    const entries = loadHistory();
+    const entry = entries.find(e => e.id === currentHistoryId);
+    if (!entry) return;
+    entry.previewSlots = serializePreviewSlots();
     saveHistory(entries);
   }
 
@@ -3945,6 +4162,13 @@
     try {
       return new Date(ts).toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
     } catch (e) { return new Date(ts).toString(); }
+  }
+
+  function buildShareUrlFromEntry(entry) {
+    const data = { a: entry.listA, b: entry.listB, c: entry.commander || null };
+    if (entry.previewSlots && entry.previewSlots.length) data.slots = entry.previewSlots;
+    const encoded = encodeShareData(data);
+    return `${location.origin}${location.pathname}#share=${encoded}`;
   }
 
   function renderHistoryList() {
@@ -3974,18 +4198,28 @@
       summaryEl.className = 'hi-summary';
       summaryEl.innerHTML = `<b>${entry.cutCount}</b> cut (−${entry.cutTotal}) · <b>${entry.addCount}</b> added (+${entry.addTotal})`;
       meta.appendChild(summaryEl);
+      if (entry.previewSlots && entry.previewSlots.length) {
+        const badge = document.createElement('div');
+        badge.className = 'hi-art-badge';
+        badge.textContent = `🎨 Proxy sheet saved (${entry.previewSlots.length} cards, incl. alternate arts)`;
+        meta.appendChild(badge);
+      }
 
       const actions = document.createElement('div');
       actions.className = 'hi-actions';
       const loadBtn = document.createElement('button');
       loadBtn.className = 'btn-small';
       loadBtn.textContent = 'Load';
-      loadBtn.addEventListener('click', () => {
-        listA.value = entry.listA;
-        listB.value = entry.listB;
-        updateCounts();
+      loadBtn.addEventListener('click', async () => {
         historyModal.classList.remove('show');
+        loadBtn.disabled = true;
+        await restoreFullState({ a: entry.listA, b: entry.listB, c: entry.commander, slots: entry.previewSlots });
+        loadBtn.disabled = false;
       });
+      const shareBtnEl = document.createElement('button');
+      shareBtnEl.className = 'btn-small';
+      shareBtnEl.textContent = 'Share';
+      shareBtnEl.addEventListener('click', () => copyShareLink(shareBtnEl, buildShareUrlFromEntry(entry)));
       const delBtn = document.createElement('button');
       delBtn.className = 'btn-small';
       delBtn.textContent = 'Delete';
@@ -3994,6 +4228,7 @@
         renderHistoryList();
       });
       actions.appendChild(loadBtn);
+      actions.appendChild(shareBtnEl);
       actions.appendChild(delBtn);
 
       item.appendChild(meta);
@@ -4012,6 +4247,317 @@
     if (confirm('Delete all saved comparison history? This cannot be undone.')) {
       saveHistory([]);
       renderHistoryList();
+    }
+  });
+
+  // =====================================================================
+  //  Collection — cards the user owns, saved locally (localStorage), keyed
+  //  by card name. Used two ways elsewhere in the app: an "Owned ×N" badge
+  //  on any card row, and grouping decklists by card type so it reads like
+  //  a real decklist while building.
+  // =====================================================================
+
+  const COLLECTION_KEY = 'cascade:collection:v1';
+  let collectionMap = loadCollectionMap();
+  let collectionCardCache = new Map(); // lowercase name -> resolved Scryfall card (session cache for grouping/prices)
+
+  function loadCollectionMap() {
+    try {
+      const raw = localStorage.getItem(COLLECTION_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveCollectionMap() {
+    try { localStorage.setItem(COLLECTION_KEY, JSON.stringify(collectionMap)); } catch (e) { /* storage full or unavailable */ }
+  }
+
+  function getCollectionQty(name) {
+    if (!name) return 0;
+    const entry = collectionMap[name.toLowerCase()];
+    return entry ? entry.qty : 0;
+  }
+
+  function setCollectionQty(name, qty) {
+    const key = name.toLowerCase();
+    const clamped = Math.max(0, Math.floor(qty) || 0);
+    if (clamped <= 0) delete collectionMap[key];
+    else collectionMap[key] = { name, qty: clamped };
+    saveCollectionMap();
+  }
+
+  function addToCollection(name, qty) {
+    setCollectionQty(name, getCollectionQty(name) + (qty || 1));
+  }
+
+  // Builds the "Your Collection" add/update block shown in the card detail
+  // modal for any card — this is the "click a card, add it to your
+  // collection with a quantity" entry point.
+  function buildCollectionSection(card) {
+    const section = document.createElement('div');
+    section.className = 'cd-collection';
+
+    const title = document.createElement('div');
+    title.className = 'cd-printings-title';
+    title.textContent = 'Your Collection';
+    section.appendChild(title);
+
+    const row = document.createElement('div');
+    row.className = 'cd-collection-row';
+
+    const owned = getCollectionQty(card.name);
+    const status = document.createElement('span');
+    status.className = 'cd-collection-status' + (owned > 0 ? ' owned' : '');
+    status.textContent = owned > 0 ? `✓ You own ${owned} cop${owned === 1 ? 'y' : 'ies'}` : 'Not in your collection';
+    row.appendChild(status);
+
+    const qtyInput = document.createElement('input');
+    qtyInput.type = 'number';
+    qtyInput.min = '0';
+    qtyInput.className = 'cd-collection-qty';
+    qtyInput.value = owned || 1;
+    row.appendChild(qtyInput);
+
+    const actionBtn = document.createElement('button');
+    actionBtn.className = 'btn-small';
+    actionBtn.textContent = owned > 0 ? 'Update Quantity' : 'Add to Collection';
+    actionBtn.addEventListener('click', () => {
+      const v = Math.max(0, parseInt(qtyInput.value, 10) || 0);
+      setCollectionQty(card.name, v);
+      collectionCardCache.set(card.name.toLowerCase(), card);
+      status.textContent = v > 0 ? `✓ You own ${v} cop${v === 1 ? 'y' : 'ies'}` : 'Not in your collection';
+      status.className = 'cd-collection-status' + (v > 0 ? ' owned' : '');
+      actionBtn.textContent = v > 0 ? 'Update Quantity' : 'Add to Collection';
+    });
+    row.appendChild(actionBtn);
+
+    section.appendChild(row);
+    return section;
+  }
+
+  // ---- Shared type grouping, used here and for grouped decklists below ----
+  const TYPE_GROUPS = ['Creatures', 'Planeswalkers', 'Battles', 'Instants', 'Sorceries', 'Artifacts', 'Enchantments', 'Lands', 'Tokens', 'Other'];
+
+  function cardTypeGroup(card) {
+    if (!card) return 'Other';
+    const type = card.type_line || (card.card_faces && card.card_faces[0] && card.card_faces[0].type_line) || '';
+    if (/\bToken\b/i.test(type)) return 'Tokens';
+    if (/\bCreature\b/i.test(type)) return 'Creatures';
+    if (/\bPlaneswalker\b/i.test(type)) return 'Planeswalkers';
+    if (/\bBattle\b/i.test(type)) return 'Battles';
+    if (/\bInstant\b/i.test(type)) return 'Instants';
+    if (/\bSorcery\b/i.test(type)) return 'Sorceries';
+    if (/\bArtifact\b/i.test(type)) return 'Artifacts';
+    if (/\bEnchantment\b/i.test(type)) return 'Enchantments';
+    if (/\bLand\b/i.test(type)) return 'Lands';
+    return 'Other';
+  }
+
+  // Renders `items` into `container`, grouped into type-group-header
+  // sections in TYPE_GROUPS order. `getCard(item)` resolves an item to its
+  // Scryfall card (for grouping); `makeRowFn(item, card)` builds its row.
+  function renderGroupedInto(container, items, getCard, makeRowFn, emptyText) {
+    container.innerHTML = '';
+    if (!items.length) {
+      const p = document.createElement('div');
+      p.className = 'empty-note';
+      p.textContent = emptyText;
+      container.appendChild(p);
+      return;
+    }
+    const groups = new Map();
+    items.forEach(it => {
+      const g = cardTypeGroup(getCard(it));
+      if (!groups.has(g)) groups.set(g, []);
+      groups.get(g).push(it);
+    });
+    TYPE_GROUPS.forEach(g => {
+      const list = groups.get(g);
+      if (!list || !list.length) return;
+      const header = document.createElement('div');
+      header.className = 'type-group-header';
+      header.textContent = `${g} (${list.length})`;
+      container.appendChild(header);
+      list.forEach(it => container.appendChild(makeRowFn(it, getCard(it))));
+    });
+  }
+
+  function makeCollectionRow(entry, card) {
+    const row = document.createElement('div');
+    row.className = 'row collection-row';
+
+    const qtyInput = document.createElement('input');
+    qtyInput.type = 'number';
+    qtyInput.min = '0';
+    qtyInput.value = entry.qty;
+    qtyInput.className = 'collection-qty-input';
+    qtyInput.addEventListener('change', () => {
+      setCollectionQty(entry.name, parseInt(qtyInput.value, 10) || 0);
+      renderCollectionList();
+    });
+    row.appendChild(qtyInput);
+
+    const nameEl = document.createElement('div');
+    nameEl.className = 'cname';
+    nameEl.textContent = entry.name;
+    if (card) {
+      nameEl.style.cursor = 'pointer';
+      nameEl.title = 'Click for full card details';
+      nameEl.addEventListener('click', () => openCardDetail(card));
+      attachHoverPreview(nameEl, cardImageUrl(card));
+    } else {
+      attachHoverPreview(nameEl, null);
+    }
+    row.appendChild(nameEl);
+
+    if (card) {
+      const type = document.createElement('div');
+      type.className = 'type-pill';
+      type.textContent = cardTypeLine(card) || '';
+      row.appendChild(type);
+      const price = cardPrice(card);
+      const priceEl = document.createElement('div');
+      priceEl.className = price ? 'price-pill' : 'price-pill na';
+      priceEl.textContent = price || '—';
+      row.appendChild(priceEl);
+    }
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'remove-x';
+    removeBtn.textContent = '×';
+    removeBtn.title = 'Remove from collection';
+    removeBtn.addEventListener('click', () => {
+      setCollectionQty(entry.name, 0);
+      renderCollectionList();
+    });
+    row.appendChild(removeBtn);
+
+    return row;
+  }
+
+  async function renderCollectionList() {
+    const entries = Object.values(collectionMap).sort((a, b) => a.name.localeCompare(b.name));
+    const totalQty = entries.reduce((s, e) => s + e.qty, 0);
+    collectionCount.textContent = `${totalQty} card${totalQty === 1 ? '' : 's'} (${entries.length} unique)`;
+
+    if (!entries.length) {
+      collectionList.innerHTML = '<div class="empty-note">Your collection is empty — import a list or add cards above.</div>';
+      return;
+    }
+
+    const unresolved = entries.filter(e => !collectionCardCache.has(e.name.toLowerCase()));
+    if (unresolved.length) {
+      collectionList.innerHTML = '<div class="empty-note">Loading card details…</div>';
+      try {
+        const { found } = await fetchCollection(unresolved.map(e => e.name));
+        found.forEach((card, key) => collectionCardCache.set(key, card));
+      } catch (e) { /* grouping/prices just won't be available for these */ }
+    }
+
+    renderGroupedInto(
+      collectionList,
+      entries,
+      (e) => collectionCardCache.get(e.name.toLowerCase()) || null,
+      makeCollectionRow,
+      'Your collection is empty — import a list or add cards above.'
+    );
+  }
+
+  createInlineCardSearch(collectionAddInput, collectionAddResults, (card) => {
+    addToCollection(card.name, 1);
+    collectionCardCache.set(card.name.toLowerCase(), card);
+    renderCollectionList();
+  });
+
+  collectionImportTextBtn.addEventListener('click', () => {
+    const parsed = parseList(collectionImportText.value);
+    if (!parsed.size) {
+      collectionImportStatus.textContent = 'Paste a list first.';
+      collectionImportStatus.className = 'lookup-status err';
+      return;
+    }
+    parsed.forEach(v => addToCollection(v.displayName, v.qty));
+    collectionImportText.value = '';
+    collectionImportStatus.textContent = `Imported ${parsed.size} card${parsed.size === 1 ? '' : 's'} into your collection.`;
+    collectionImportStatus.className = 'lookup-status';
+    renderCollectionList();
+  });
+
+  collectionFileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    collectionImportStatus.textContent = 'Reading spreadsheet…';
+    collectionImportStatus.className = 'lookup-status';
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const wb = XLSX.read(evt.target.result, { type: 'array' });
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet);
+        let imported = 0;
+        rows.forEach(row => {
+          const name = row['Name'] || row['name'] || row['Card Name'] || row['Card'] || row['card'];
+          const qtyRaw = row['Quantity'] || row['quantity'] || row['Qty'] || row['qty'] || row['Count'] || row['count'];
+          if (!name) return;
+          const qty = parseInt(qtyRaw, 10) || 1;
+          addToCollection(String(name).trim(), qty);
+          imported++;
+        });
+        if (!imported) {
+          collectionImportStatus.textContent = "Couldn't find a Name/Quantity column in that file.";
+          collectionImportStatus.className = 'lookup-status err';
+        } else {
+          collectionImportStatus.textContent = `Imported ${imported} row${imported === 1 ? '' : 's'} from ${file.name}.`;
+          collectionImportStatus.className = 'lookup-status';
+          renderCollectionList();
+        }
+      } catch (err) {
+        collectionImportStatus.textContent = "Couldn't read that file — make sure it's a valid spreadsheet.";
+        collectionImportStatus.className = 'lookup-status err';
+      }
+    };
+    reader.readAsArrayBuffer(file);
+    collectionFileInput.value = '';
+  });
+
+  function downloadTextFile(filename, text) {
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  collectionExportTextBtn.addEventListener('click', () => {
+    const entries = Object.values(collectionMap).sort((a, b) => a.name.localeCompare(b.name));
+    if (!entries.length) return;
+    const text = entries.map(e => `${e.qty} ${e.name}`).join('\n');
+    downloadTextFile('cascade-collection.txt', text);
+  });
+
+  collectionExportXlsxBtn.addEventListener('click', () => {
+    const entries = Object.values(collectionMap).sort((a, b) => a.name.localeCompare(b.name));
+    if (!entries.length) return;
+    const aoa = [['Name', 'Quantity']];
+    entries.forEach(e => aoa.push([e.name, e.qty]));
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = [{ wch: 32 }, { wch: 10 }];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Collection');
+    XLSX.writeFile(wb, 'cascade-collection.xlsx');
+  });
+
+  collectionClearBtn.addEventListener('click', () => {
+    if (Object.keys(collectionMap).length && confirm('Delete your entire saved collection? This cannot be undone.')) {
+      collectionMap = {};
+      saveCollectionMap();
+      renderCollectionList();
     }
   });
 
@@ -4385,6 +4931,7 @@
     previewCount.textContent = `${previewSlots.length} card${previewSlots.length === 1 ? '' : 's'}`;
     if (!previewSlots.length) {
       previewGrid.innerHTML = '<div class="preview-empty">No cards here — add some above, or close this and adjust your filters.</div>';
+      persistPreviewSlotsToHistory();
       return;
     }
     previewSlots.forEach((slot) => {
@@ -4471,6 +5018,7 @@
 
       previewGrid.appendChild(tile);
     });
+    persistPreviewSlotsToHistory();
   }
 
   buildPdfBtn.addEventListener('click', async () => {
@@ -5862,10 +6410,13 @@
   });
 
   // =====================================================================
-  //  Share link — encodes both lists (and the selected commander, if any)
-  //  into the URL's hash fragment, which never leaves the browser (no
-  //  server involved), so it works fine on a static page. Opening a shared
-  //  link restores both lists and re-runs the comparison automatically.
+  //  Share link — encodes both lists, the selected commander, and
+  //  (optionally) the exact print-preview state into the URL's hash
+  //  fragment, which never leaves the browser (no server involved), so it
+  //  works fine on a static page. Opening a shared link restores
+  //  everything and re-runs the comparison automatically. The same
+  //  encode/restore logic backs the "Share" button on saved History
+  //  entries, so a history entry is just as shareable as the live page.
   // =====================================================================
 
   function encodeShareData(obj) {
@@ -5882,29 +6433,90 @@
     }
   }
 
-  shareBtn.addEventListener('click', async () => {
+  // Snapshot of the live print preview: exact printing id, face, and
+  // token/emblem status per slot, in order — enough to rebuild it exactly.
+  function serializePreviewSlots() {
+    if (!previewSlots.length) return null;
+    return previewSlots.map(s => ({
+      id: s.baseCard.id,
+      f: s.faceIndex || 0,
+      t: s.isToken ? 1 : 0,
+      k: s.tokenKind || null,
+    }));
+  }
+
+  function buildShareUrl(includeSlots) {
     const data = { a: listA.value, b: listB.value, c: selectedCommander ? selectedCommander.name : null };
+    if (includeSlots) {
+      const slots = serializePreviewSlots();
+      if (slots) data.slots = slots;
+    }
     const encoded = encodeShareData(data);
-    const url = `${location.origin}${location.pathname}#share=${encoded}`;
-    const original = shareBtn.textContent;
+    return `${location.origin}${location.pathname}#share=${encoded}`;
+  }
+
+  async function copyShareLink(btn, url) {
+    const original = btn.textContent;
     try {
       if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error('no clipboard API');
       await navigator.clipboard.writeText(url);
-      shareBtn.textContent = 'Link Copied!';
+      btn.textContent = 'Link Copied!';
     } catch (e) {
       window.prompt('Copy this link:', url);
-      shareBtn.textContent = 'Link Ready';
+      btn.textContent = 'Link Ready';
     }
-    setTimeout(() => { shareBtn.textContent = original; }, 1800);
+    setTimeout(() => { btn.textContent = original; }, 1800);
+  }
+
+  shareBtn.addEventListener('click', () => copyShareLink(shareBtn, buildShareUrl(false)));
+
+  // Includes every card's exact printing (art/set) currently in the print
+  // preview, so whoever opens the link — or reloads this History entry —
+  // sees the identical proxy sheet: same cards, same order, same
+  // alternate arts, same auto-added tokens/emblems.
+  previewShareBtn.addEventListener('click', () => {
+    if (!previewSlots.length) {
+      previewStatus.textContent = 'Nothing to share yet — add some cards first.';
+      return;
+    }
+    copyShareLink(previewShareBtn, buildShareUrl(true));
   });
 
-  async function loadFromShareHash() {
-    const hash = location.hash || '';
-    const m = hash.match(/#share=([^&]+)/);
-    if (!m) return;
-    const data = decodeShareData(decodeURIComponent(m[1]));
-    if (!data) return;
+  // Rebuilds previewSlots from an array of {id, f, t, k} using the exact
+  // Scryfall printing ids, then opens the print preview showing them.
+  async function restorePreviewSlotsFromShare(slotSpecs) {
+    const ids = Array.from(new Set(slotSpecs.map(s => s.id)));
+    const cardsById = await fetchCardsByIds(ids);
 
+    const slots = [];
+    slotSpecs.forEach(spec => {
+      const card = cardsById.get(spec.id);
+      if (!card) return;
+      const faces = getCardFaceImages(card, 'large');
+      const faceIdx = Math.min(spec.f || 0, Math.max(faces.length - 1, 0));
+      const face = faces[faceIdx] || faces[0];
+      if (!face) return;
+      const slot = makeSlotFromCard(card, faceIdx, face);
+      if (spec.t) {
+        slot.isToken = true;
+        slot.tokenKind = spec.k || 'Token';
+      }
+      slots.push(slot);
+    });
+    if (!slots.length) return;
+
+    previewSlots = slots;
+    addedTokenNames = new Set();
+    previewStatus.textContent = `Restored ${slots.length} card${slots.length === 1 ? '' : 's'}.`;
+    previewStatus.classList.remove('err');
+    renderPreviewGrid();
+    previewModal.classList.add('show');
+  }
+
+  // Shared by both "open a shared link" and "Load" on a History entry:
+  // enters the right mode, restores the lists and commander, re-runs the
+  // comparison, and — if present — restores the exact print-preview state.
+  async function restoreFullState(data) {
     enterMode(typeof data.a === 'string' && data.a.trim() ? 'upgrade' : 'build');
 
     if (typeof data.a === 'string') listA.value = data.a;
@@ -5918,7 +6530,22 @@
       } catch (e) { /* lists are still populated even if this fails */ }
     }
 
-    if (listA.value.trim() || listB.value.trim()) compareBtn.click();
+    if (listA.value.trim() || listB.value.trim()) await runCompare();
+
+    if (Array.isArray(data.slots) && data.slots.length) {
+      try {
+        await restorePreviewSlotsFromShare(data.slots);
+      } catch (e) { /* the base comparison is still shown even if this fails */ }
+    }
+  }
+
+  async function loadFromShareHash() {
+    const hash = location.hash || '';
+    const m = hash.match(/#share=([^&]+)/);
+    if (!m) return;
+    const data = decodeShareData(decodeURIComponent(m[1]));
+    if (!data) return;
+    await restoreFullState(data);
   }
   loadFromShareHash();
 })();
